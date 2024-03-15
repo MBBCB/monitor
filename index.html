@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schedule Calendar</title>
+<style>
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* Calendar */
+  #calendar {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 5px;
+    font-family: Arial, sans-serif;
+  }
+
+  .day {
+    border: 1px solid #ccc;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    background-color: #fff;
+    text-align: center;
+    margin: 5px;
+    border-radius: 5px;
+  }
+
+  .day:hover {
+    background-color: #f0f0f0;
+  }
+
+  .date {
+    font-size: 18px;
+    font-weight: bold;
+    color: #555;
+  }
+
+  .day-name {
+    font-size: 14px;
+    color: #999;
+  }
+
+  .users {
+    font-size: 12px;
+    color: #777;
+  }
+
+  /* Nearest date styling */
+  .nearest-date {
+    transform: scale(1.1);
+    border-width: 2px;
+  background-color:#f54260;
+  color: white;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 600px) {
+    .day {
+      font-size: 14px;
+      padding: 5px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="calendar"></div>
+
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+const schedule = [
+    // March
+    { day: "Sunday, March 3", users: ["Azua", "Shahiza"] },
+    { day: "Monday, March 4", users: ["Azrin", "Wildan", "Prashant"] },
+    { day: "Tuesday, March 5", users: ["Siti R", "Fatin", "Yusri"] },
+    { day: "Sunday, March 10", users: ["Gan", "Mike"] },
+    { day: "Monday, March 11", users: ["Win Junn", "Aida", "Jon"] },
+    { day: "Tuesday, March 12", users: ["Yan", "Azrin", "Rezal"] },
+    { day: "Sunday, March 17", users: ["Sree", "Azhari"] },
+    { day: "Monday, March 18", users: ["Yan", "Afiq", "Izham"] },
+    { day: "Tuesday, March 19", users: ["Yusri", "Siti R", "Ajijee"] },
+    { day: "Sunday, March 24", users: ["Wildan", "Janina"] },
+    { day: "Monday, March 25", users: ["Mike", "Ong", "Azua"] },
+    { day: "Tuesday, March 26", users: ["Ain", "Huda", "Calvin"] },
+    { day: "Sunday, March 31", users: ["Gan", "Shahiza"] },
+
+    // April
+    { day: "Monday, April 1", users: ["Yan", "Yusri", "Sree"] },
+    { day: "Tuesday, April 2", users: ["Afiq", "Azrin", "Wildan"] },
+    { day: "Sunday, April 7", users: ["Azhari", "Aida"] },
+    { day: "Monday, April 8", users: ["Azua", "Fatin", "Mike"] },
+    { day: "Tuesday, April 9", users: ["Izham", "Ajijee", "Huda"] },
+    { day: "Sunday, April 14", users: ["Yusri", "Janina"] },
+    { day: "Monday, April 15", users: ["Siti R", "Win Junn", "Gan"] },
+    { day: "Tuesday, April 16", users: ["Ain", "Shahiza", "Yan"] },
+    { day: "Sunday, April 21", users: ["Azua", "Azhari"] },
+    { day: "Monday, April 22", users: ["Mike", "Azrin", "Sree"] },
+    { day: "Tuesday, April 23", users: ["Huda", "Fatin", "Wildan"] },
+    { day: "Sunday, April 28", users: ["Izham", "Afiq"] },
+    { day: "Monday, April 29", users: ["Yan", "Aida", "Shahiza"] },
+    { day: "Tuesday, April 30", users: ["Siti R", "Win Junn", "Ajijee"] },
+
+    // May
+    { day: "Sunday, May 5", users: ["Azua", "Azhari"] },
+    { day: "Monday, May 6", users: ["Mike", "Yan", "Yusri"] },
+    { day: "Tuesday, May 7", users: ["Fatin", "Afiq", "Izham"] },
+    { day: "Sunday, May 12", users: ["Siti R", "Azrin"] },
+    { day: "Monday, May 13", users: ["Shahiza", "Win Junn", "Sree"] },
+    { day: "Tuesday, May 14", users: ["Huda", "Aida", "Janina"] },
+    { day: "Sunday, May 19", users: ["Yan", "Gan"] },
+    { day: "Monday, May 20", users: ["Fatin", "Ajijee", "Azua"] },
+    { day: "Tuesday, May 21", users: ["Yusri", "Ain", "Wildan"] },
+    { day: "Sunday, May 26", users: ["Azhari", "Sree"] },
+    { day: "Monday, May 27", users: ["Mike", "Azrin", "Siti R"] },
+    { day: "Tuesday, May 28", users: ["Huda", "Aida", "Shahiza"] },
+
+    // June
+    { day: "Sunday, June 2", users: ["Yan", "Afiq"] },
+    { day: "Monday, June 3", users: ["Fatin", "Win Junn", "Azua"] },
+    { day: "Tuesday, June 4", users: ["Yusri", "Sree", "Wildan"] },
+    { day: "Sunday, June 9", users: ["Azhari", "Aida"] },
+    { day: "Monday, June 10", users: ["Mike", "Azrin", "Izham"] },
+    { day: "Tuesday, June 11", users: ["Huda", "Janina", "Ajijee"] },
+    { day: "Sunday, June 16", users: ["Yan", "Siti R"] },
+    { day: "Monday, June 17", users: ["Fatin", "Gan", "Shahiza"] },
+    { day: "Tuesday, June 18", users: ["Yusri", "Ain", "Sree"] },
+    { day: "Sunday, June 23", users: ["Azhari", "Wildan"] },
+    { day: "Monday, June 24", users: ["Mike", "Win Junn", "Azua"] },
+    { day: "Tuesday, June 25", users: ["Huda", "Aida", "Yan"] },
+    { day: "Sunday, June 30", users: ["Fatin", "Afiq"] },
+
+
+    // July
+    { day: "Sunday, July 7", users: ["Sree", "Azhari"] },
+    { day: "Monday, July 8", users: ["Yan", "Afiq", "Izham"] },
+    { day: "Tuesday, July 9", users: ["Yusri", "Siti R", "Ajijee"] },
+    { day: "Sunday, July 14", users: ["Wildan", "Janina"] },
+    { day: "Monday, July 15", users: ["Mike", "Ong", "Azua"] },
+    { day: "Tuesday, July 16", users: ["Ain", "Huda", "Calvin"] },
+    { day: "Sunday, July 21", users: ["Gan", "Shahiza"] },
+    { day: "Monday, July 22", users: ["Yan", "Yusri", "Sree"] },
+    { day: "Tuesday, July 23", users: ["Afiq", "Azrin", "Wildan"] },
+    { day: "Sunday, July 28", users: ["Azhari", "Aida"] },
+    { day: "Monday, July 29", users: ["Azua", "Fatin", "Mike"] },
+    { day: "Tuesday, July 30", users: ["Izham", "Ajijee", "Huda"] },
+
+    // August
+    { day: "Sunday, August 4", users: ["Yusri", "Janina"] },
+    { day: "Monday, August 5", users: ["Siti R", "Win Junn", "Gan"] },
+    { day: "Tuesday, August 6", users: ["Ain", "Shahiza", "Yan"] },
+    { day: "Sunday, August 11", users: ["Azua", "Azhari"] },
+    { day: "Monday, August 12", users: ["Mike", "Azrin", "Sree"] },
+    { day: "Tuesday, August 13", users: ["Huda", "Fatin", "Wildan"] },
+    { day: "Sunday, August 18", users: ["Izham", "Afiq"] },
+    { day: "Monday, August 19", users: ["Yan", "Aida", "Shahiza"] },
+    { day: "Tuesday, August 20", users: ["Siti R", "Win Junn", "Ajijee"] },
+    { day: "Sunday, August 25", users: ["Azua", "Azhari"] },
+    { day: "Monday, August 26", users: ["Mike", "Azrin", "Sree"] },
+    { day: "Tuesday, August 27", users: ["Huda", "Fatin", "Wildan"] },
+    { day: "Sunday, August 31", users: ["Izham", "Afiq"] },
+
+  // September
+    { day: "Sunday, September 1", users: ["Sree", "Azhari"] },
+    { day: "Monday, September 2", users: ["Yan", "Afiq", "Izham"] },
+    { day: "Tuesday, September 3", users: ["Yusri", "Siti R", "Ajijee"] },
+    { day: "Sunday, September 8", users: ["Wildan", "Janina"] },
+    { day: "Monday, September 9", users: ["Mike", "Ong", "Azua"] },
+    { day: "Tuesday, September 10", users: ["Ain", "Huda", "Azrin"] },
+    { day: "Sunday, September 15", users: ["Gan", "Shahiza"] },
+    { day: "Monday, September 16", users: ["Yan", "Yusri", "Sree"] },
+    { day: "Tuesday, September 17", users: ["Afiq", "Azrin", "Wildan"] },
+    { day: "Sunday, September 22", users: ["Azhari", "Aida"] },
+    { day: "Monday, September 23", users: ["Azua", "Fatin", "Mike"] },
+    { day: "Tuesday, September 24", users: ["Izham", "Ajijee", "Huda"] },
+    { day: "Sunday, September 29", users: ["Yusri", "Janina"] },
+    { day: "Monday, September 30", users: ["Siti R", "Win Junn", "Gan"] },
+
+    // October
+    { day: "Sunday, October 6", users: ["Ain", "Shahiza"] },
+    { day: "Monday, October 7", users: ["Siti R", "Win Junn", "Ajijee"] },
+    { day: "Tuesday, October 8", users: ["Yusri", "Aida", "Sree"] },
+    { day: "Sunday, October 13", users: ["Azhari", "Afiq"] },
+    { day: "Monday, October 14", users: ["Mike", "Azrin", "Azua"] },
+    { day: "Tuesday, October 15", users: ["Huda", "Fatin", "Wildan"] },
+    { day: "Sunday, October 20", users: ["Izham", "Aida"] },
+    { day: "Monday, October 21", users: ["Azua", "Fatin", "Mike"] },
+    { day: "Tuesday, October 22", users: ["Izham", "Ajijee", "Huda"] },
+    { day: "Sunday, October 27", users: ["Yusri", "Janina"] },
+    { day: "Monday, October 28", users: ["Siti R", "Win Junn", "Gan"] },
+    { day: "Tuesday, October 29", users: ["Ain", "Yan", "Sree"] },
+
+    // November
+    { day: "Sunday, November 3", users: ["Azua", "Azhari"] },
+    { day: "Monday, November 4", users: ["Mike", "Azrin", "Sree"] },
+    { day: "Tuesday, November 5", users: ["Huda", "Fatin", "Wildan"] },
+    { day: "Sunday, November 10", users: ["Izham", "Afiq"] },
+    { day: "Monday, November 11", users: ["Yan", "Aida", "Shahiza"] },
+    { day: "Tuesday, November 12", users: ["Siti R", "Win Junn", "Ajijee"] },
+    { day: "Sunday, November 17", users: ["Azhari", "Janina"] },
+    { day: "Monday, November 18", users: ["Mike", "Ong", "Azua"] },
+    { day: "Tuesday, November 19", users: ["Ain", "Huda", "Azrin"] },
+    { day: "Sunday, November 24", users: ["Gan", "Shahiza"] },
+    { day: "Monday, November 25", users: ["Yan", "Yusri", "Sree"] },
+    { day: "Tuesday, November 26", users: ["Afiq", "Azrin", "Wildan"] },
+
+    // December
+    { day: "Sunday, December 1", users: ["Sree", "Azhari"] },
+    { day: "Monday, December 2", users: ["Yan", "Afiq", "Izham"] },
+    { day: "Tuesday, December 3", users: ["Yusri", "Siti R", "Ajijee"] },
+    { day: "Sunday, December 8", users: ["Wildan", "Janina"] },
+    { day: "Monday, December 9", users: ["Mike", "Ong", "Azua"] },
+    { day: "Tuesday, December 10", users: ["Ain", "Huda", "Azrin"] },
+    { day: "Sunday, December 15", users: ["Gan", "Shahiza"] },
+    { day: "Monday, December 16", users: ["Yan", "Yusri", "Sree"] },
+    { day: "Tuesday, December 17", users: ["Afiq", "Azrin", "Wildan"] },
+    { day: "Sunday, December 22", users: ["Azhari", "Aida"] },
+    { day: "Monday, December 23", users: ["Azua", "Fatin", "Mike"] },
+    { day: "Tuesday, December 24", users: ["Izham", "Ajijee", "Huda"] },
+    { day: "Sunday, December 29", users: ["Yusri", "Janina"] },
+    { day: "Monday, December 30", users: ["Siti R", "Win Junn", "Gan"] },
+  ];
+
+document.addEventListener("DOMContentLoaded", function() {
+  const today = new Date();
+  const calendarContainer = document.getElementById('calendar');
+  let nearestDateIndex = -1;
+  
+  // Find the nearest date
+  schedule.forEach((item, index) => {
+    const [day, date] = item.day.split(', ');
+    const formattedDate = new Date(date + ", 2024");
+    if (formattedDate >= today && (nearestDateIndex === -1 || formattedDate < new Date(schedule[nearestDateIndex].day.split(', ')[1] + ", 2024"))) {
+      nearestDateIndex = index;
+    }
+  });
+  
+  // Generate calendar
+  schedule.forEach((item, index) => {
+    const [day, date] = item.day.split(', ');
+    const formattedDate = new Date(date + ", 2024");
+    const dateString = formattedDate.toISOString().split('T')[0];
+    const usersString = item.users.join(', ');
+    
+    // Add only if the date is after or equal to today's date
+    if (formattedDate >= today) {
+      const dayDiv = document.createElement('div');
+      dayDiv.classList.add('day');
+      dayDiv.dataset.date = dateString;
+      dayDiv.innerHTML = `
+        <div class="date">${date}</div>
+        <div class="day-name">${day}</div>
+        <div class="users">${usersString}</div>
+      `;
+      
+      // Apply special styling for the nearest date
+      if (index === nearestDateIndex) {
+        dayDiv.classList.add('nearest-date');
+      }
+      
+      calendarContainer.appendChild(dayDiv);
+    }
+  });
+  
+  // Modal functionality
+  const modal = document.getElementById('modal');
+  const modalContent = document.getElementById('modal-content');
+  const closeModal = document.querySelector('.close');
+  
+  calendarContainer.addEventListener('click', function(event) {
+    if (event.target.classList.contains('day')) {
+      const date = event.target.dataset.date;
+      const scheduleItem = schedule.find(item => item.day.includes(date));
+      modalContent.innerHTML = `<p>${scheduleItem.day}</p><p>Users: ${scheduleItem.users.join(', ')}</p>`;
+      modal.style.display = 'block';
+    }
+  });
+  
+  closeModal.addEventListener('click', function() {
+    modal.style.display = 'none';
+  });
+  
+  window.addEventListener('click', function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  });
+});
+</script>
+
+</body>
+</html>
