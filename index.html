@@ -147,6 +147,10 @@
     cursor: pointer;
   }
 
+  .date-modal {
+    font-size: 40px;
+  }
+
 
   /* Mobile responsiveness */
   @media (max-width: 600px) {
@@ -363,13 +367,19 @@ document.addEventListener("DOMContentLoaded", function() {
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
         modalContent.innerHTML = `
-          <p class="modal-info"><strong>Date: </strong>${item.day}</p>
-          <p class="modal-info"><strong>Users: </strong>${usersString}</p>
-
+          <p class="date-modal">${item.day}</p>
         `;
+        
+        // Split users into separate <p> elements
+        item.users.forEach((user, index) => {
+    const userParagraph = document.createElement('p');
+    userParagraph.innerHTML = `<strong>Session ${index + 1}: </strong>${user}`;
+    modalContent.appendChild(userParagraph);
+});
+
         modal.style.display = 'block';
-      });
-      
+    });
+          
       calendarContainer.appendChild(dayDiv);
     }
   });
