@@ -17,7 +17,7 @@
     { day: "Tuesday, April 23", users: ["RCMS", "DC", "FD"] },
 	
     { day: "Sunday, April 28", users: ["SVG", "RCMS", "CA"] },
-    { day: "Monday, April 29", users: ["CA", "FD", "SAFE"] },
+    { day: "Monday, April 29", users: ["CA", "Reshma", "SAFE"] },
     { day: "Tuesday, April 30", users: ["DC", "SAFE", "SVG"] },
 
     // May
