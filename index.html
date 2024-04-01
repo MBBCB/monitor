@@ -71,9 +71,7 @@
 	  transition: all 0.3s ease;
 	}
 
-	nav ul li a:hover {
-	  background-color: #555;
-	}
+
 
 
 
@@ -214,8 +212,7 @@
 
 <nav>
   <ul>
-    <li><a href="#">Online Schedule</a></li>
-    <li><a href="#">Batch Schedule</a></li>
+    <li><a href="monitor.html">Online & Batch Schedule</a></li>
   </ul>
 </nav>
 
@@ -278,33 +275,34 @@ document.addEventListener("DOMContentLoaded", function() {
         modalContent.innerHTML = `
           <p class="date-modal">${item.day}</p>
 		  <div class='modal-div'>
-		  <p class="session-modal"><b>SESSION 1 : 0000 - 0700</b></p>
-		  <p class="session-modal"><b>SESSION 2 : 0700 - 1300</b></p>
-		  <p class="session-modal"><b>SESSION 3 : 1300 - 1900</b></p>
+		  <p class="session-modal"><b>SESSION 1 : 0000 - 0700 : BATCH</b></p>
+		  <p class="session-modal"><b>SESSION 2 : 0700 - 1300 : ONLINE</b></p>
+		  <p class="session-modal"><b>SESSION 3 : 1300 - 1900 : ONLINE</b></p>
 		  </div>
         `;
         
+		
         // Split users into separate <p> elements
         item.users.forEach((user, index) => {
-    const userParagraph = document.createElement('p');
-    userParagraph.innerHTML = `<strong>Session ${index + 1}: </strong>${user}`;
-    modalContent.appendChild(userParagraph);
-});
+		const userParagraph = document.createElement('p');
+		userParagraph.innerHTML = `<strong>Session ${index + 1}: </strong>${user}`;
+		modalContent.appendChild(userParagraph);
+	});
 
-        modal.style.display = 'block';
-    });
-          
-      calendarContainer.appendChild(dayDiv);
-    }
-  });
-  
-  // Close modal when clicking on close button
-  const closeButton = document.querySelector('.close');
-  closeButton.addEventListener('click', function() {
-    const modal = document.getElementById('modal');
-    modal.style.display = 'none';
-  });
-});
+			modal.style.display = 'block';
+		});
+			  
+		  calendarContainer.appendChild(dayDiv);
+		}
+	  });
+	  
+	  // Close modal when clicking on close button
+	  const closeButton = document.querySelector('.close');
+	  closeButton.addEventListener('click', function() {
+		const modal = document.getElementById('modal');
+		modal.style.display = 'none';
+	  });
+	});
 </script>
 
 
