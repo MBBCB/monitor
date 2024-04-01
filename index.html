@@ -240,49 +240,56 @@ document.addEventListener("DOMContentLoaded", function() {
   const schedule = [
 
     // April
-    { day: "Monday, April 1", users: ["Yan", "Yusri", "Sree"] },
-    { day: "Tuesday, April 2", users: ["Afiq", "Azrin", "Wildan"] },
-    { day: "Sunday, April 7", users: ["Azhari", "Aida"] },
-    { day: "Monday, April 8", users: ["Azua", "Fatin", "Mike"] },
-    { day: "Tuesday, April 9", users: ["Izham", "Ajijee", "Huda"] },
-    { day: "Sunday, April 14", users: ["Yusri", "Janina"] },
-    { day: "Monday, April 15", users: ["Siti R", "Win Junn", "Gan"] },
-    { day: "Tuesday, April 16", users: ["Ain", "Shahiza", "Yan"] },
-    { day: "Sunday, April 21", users: ["Azua", "Azhari"] },
-    { day: "Monday, April 22", users: ["Mike", "Azrin", "Sree"] },
-    { day: "Tuesday, April 23", users: ["Huda", "Fatin", "Wildan"] },
-    { day: "Sunday, April 28", users: ["Izham", "Afiq"] },
-    { day: "Monday, April 29", users: ["Yan", "Aida", "Shahiza"] },
-    { day: "Tuesday, April 30", users: ["Siti R", "Win Junn", "Ajijee"] },
+    { day: "Monday, April 1", users: ["CA", "DC", "FD"] },
+    { day: "Tuesday, April 2", users: ["SAFE", "CA", "SVG"] },
+	
+    { day: "Sunday, April 7", users: ["RCMS", "GCIF", "GCIF"] },
+    { day: "Monday, April 8", users: ["CA", "GCIF", "GCIF"] },
+    { day: "Tuesday, April 9", users: ["SVG", "DC", "FD"] },
+	
+    { day: "Sunday, April 14", users: ["DC", "CA", "SVG"] },
+    { day: "Monday, April 15", users: ["CA", "SAFE", "RCMS"] },
+    { day: "Tuesday, April 16", users: ["FD", "GCIF", "GCIF"] },
+	
+    { day: "Sunday, April 21", users: ["SAFE", "FD", "CA"] },
+    { day: "Monday, April 22", users: ["CA", "SVG", "SAFE"] },
+    { day: "Tuesday, April 23", users: ["RCMS", "DC", "FD"] },
+	
+    { day: "Sunday, April 28", users: ["SVG", "RCMS", "CA"] },
+    { day: "Monday, April 29", users: ["CA", "FD", "SAFE"] },
+    { day: "Tuesday, April 30", users: ["DC", "SAFE", "SVG"] },
 
     // May
-    { day: "Sunday, May 5", users: ["Azua", "Azhari"] },
-    { day: "Monday, May 6", users: ["Mike", "Yan", "Yusri"] },
-    { day: "Tuesday, May 7", users: ["Fatin", "Afiq", "Izham"] },
-    { day: "Sunday, May 12", users: ["Siti R", "Azrin"] },
-    { day: "Monday, May 13", users: ["Shahiza", "Win Junn", "Sree"] },
-    { day: "Tuesday, May 14", users: ["Huda", "Aida", "Janina"] },
-    { day: "Sunday, May 19", users: ["Yan", "Gan"] },
-    { day: "Monday, May 20", users: ["Fatin", "Ajijee", "Azua"] },
-    { day: "Tuesday, May 21", users: ["Yusri", "Ain", "Wildan"] },
-    { day: "Sunday, May 26", users: ["Azhari", "Sree"] },
-    { day: "Monday, May 27", users: ["Mike", "Azrin", "Siti R"] },
-    { day: "Tuesday, May 28", users: ["Huda", "Aida", "Shahiza"] },
+    { day: "Sunday, May 5", users: ["FD", "SAFE", "RCMS"] },
+    { day: "Monday, May 6", users: ["CA", "SVG", "DC"] },
+    { day: "Tuesday, May 7", users: ["SAFE", "RCMS", "CA"] },
+	
+    { day: "Sunday, May 12", users: ["RCMS", "DC", "SVG"] },
+    { day: "Monday, May 13", users: ["CA", "FD", "SAFE"] },
+    { day: "Tuesday, May 14", users: ["SVG", "CA", "DC"] },
+	
+    { day: "Sunday, May 19", users: ["DC", "SAFE", "FD"] },
+    { day: "Monday, May 20", users: ["CA", "SVG", "DC"] },
+    { day: "Tuesday, May 21", users: ["FD", "RCMS", "CA"] },
+	
+    { day: "Sunday, May 26", users: ["SAFE", "GCIF", "GCIF"] },
+    { day: "Monday, May 27", users: ["CA", "GCIF", "GCIF"] },
+    { day: "Tuesday, May 28", users: ["DC", "CA", "RCMS"] },
 
     // June
-    { day: "Sunday, June 2", users: ["Yan", "Afiq"] },
+    { day: "Sunday, June 2", users: ["Yan", "Afiq", "Yusri"] },
     { day: "Monday, June 3", users: ["Fatin", "Win Junn", "Azua"] },
     { day: "Tuesday, June 4", users: ["Yusri", "Sree", "Wildan"] },
-    { day: "Sunday, June 9", users: ["Azhari", "Aida"] },
+    { day: "Sunday, June 9", users: ["Azhari", "Aida", "Yusri"] },
     { day: "Monday, June 10", users: ["Mike", "Azrin", "Izham"] },
     { day: "Tuesday, June 11", users: ["Huda", "Janina", "Ajijee"] },
-    { day: "Sunday, June 16", users: ["Yan", "Siti R"] },
+    { day: "Sunday, June 16", users: ["Yan", "Siti R", "Yusri"] },
     { day: "Monday, June 17", users: ["Fatin", "Gan", "Shahiza"] },
     { day: "Tuesday, June 18", users: ["Yusri", "Ain", "Sree"] },
-    { day: "Sunday, June 23", users: ["Azhari", "Wildan"] },
+    { day: "Sunday, June 23", users: ["Azhari", "Wildan", "Yusri"] },
     { day: "Monday, June 24", users: ["Mike", "Win Junn", "Azua"] },
     { day: "Tuesday, June 25", users: ["Huda", "Aida", "Yan"] },
-    { day: "Sunday, June 30", users: ["Fatin", "Afiq"] },
+    { day: "Sunday, June 30", users: ["Fatin", "Afiq", "Yusri"] },
 
 
     // July
