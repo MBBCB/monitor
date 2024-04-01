@@ -40,6 +40,44 @@
     cursor: pointer;
   }
 
+	nav {
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  width: 100%;
+	  background-color: #333;
+	  padding: 10px 0;
+	  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	  z-index: 10;
+	  font-family: Arial, sans-serif;
+	}
+
+	nav ul {
+	  list-style-type: none;
+	  margin: 0;
+	  padding: 0;
+	  text-align: center;
+	}
+
+	nav ul li {
+	  display: inline;
+	}
+
+	nav ul li a {
+	  display: inline-block;
+	  color: #fff;
+	  text-decoration: none;
+	  padding: 10px 20px;
+	  transition: all 0.3s ease;
+	}
+
+	nav ul li a:hover {
+	  background-color: #555;
+	}
+
+
+
+
   /* Calendar */
   #calendar {
     display: grid;
@@ -150,6 +188,17 @@
   .date-modal {
     font-size: 40px;
   }
+  
+   .session-modal {
+    font-size: 20px;
+  }
+  
+  .modal-div{
+	background-color: yellow;
+	margin: 10px;
+	padding: 20px;
+	border-radius: 20px;
+  }
 
 
   /* Mobile responsiveness */
@@ -162,6 +211,15 @@
 </style>
 </head>
 <body>
+
+<nav>
+  <ul>
+    <li><a href="#">Online Schedule</a></li>
+    <li><a href="#">Batch Schedule</a></li>
+  </ul>
+</nav>
+
+<br><br><br>
 
 <div id="calendar"></div>
 
@@ -180,20 +238,6 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Find the nearest date
   const schedule = [
-    // March
-    { day: "Sunday, March 3", users: ["Azua", "Shahiza"] },
-    { day: "Monday, March 4", users: ["Azrin", "Wildan", "Prashant"] },
-    { day: "Tuesday, March 5", users: ["Siti R", "Fatin", "Yusri"] },
-    { day: "Sunday, March 10", users: ["Gan", "Mike"] },
-    { day: "Monday, March 11", users: ["Win Junn", "Aida", "Jon"] },
-    { day: "Tuesday, March 12", users: ["Yan", "Azrin", "Rezal"] },
-    { day: "Sunday, March 17", users: ["Sree", "Azhari"] },
-    { day: "Monday, March 18", users: ["Yan", "Afiq", "Izham"] },
-    { day: "Tuesday, March 19", users: ["Yusri", "Siti R", "Ajijee"] },
-    { day: "Sunday, March 24", users: ["Wildan", "Janina"] },
-    { day: "Monday, March 25", users: ["Mike", "Ong", "Azua"] },
-    { day: "Tuesday, March 26", users: ["DC", "RCMS", "CA"] },
-    { day: "Sunday, March 31", users: ["FD", "SAFE", "RCMS"] },
 
     // April
     { day: "Monday, April 1", users: ["Yan", "Yusri", "Sree"] },
@@ -361,6 +405,8 @@ document.addEventListener("DOMContentLoaded", function() {
       if (index === nearestDateIndex) {
         dayDiv.classList.add('nearest-date');
       }
+		
+
       
       dayDiv.addEventListener('click', function() {
         // Open modal and display information
@@ -368,6 +414,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const modalContent = document.getElementById('modal-content');
         modalContent.innerHTML = `
           <p class="date-modal">${item.day}</p>
+		  <div class='modal-div'>
+		  <p class="session-modal"><b>SESSION 1 : 0000 - 0700</b></p>
+		  <p class="session-modal"><b>SESSION 2 : 0700 - 1300</b></p>
+		  <p class="session-modal"><b>SESSION 3 : 1300 - 1900</b></p>
+		  </div>
         `;
         
         // Split users into separate <p> elements
