@@ -271,8 +271,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
         const modalDivId = formattedDate.getDay() === 0 ? 'weekend' : 'weekday';
-		const session1Timing = formattedDate.getDay() === 0 ? '0000 - 0530' : '0000 - 0700';
-		const session2Timing = formattedDate.getDay() === 0 ? '0530 - 1300' : '0700 - 1300';
+		const session1Timing = formattedDate.getDay() === 0 ? '0000 - 0700' : '0000 - 0700';
+		const session2Timing = formattedDate.getDay() === 0 ? '0700 - 1300' : '0700 - 1300';
 
 		modalContent.innerHTML = `
 			<p class="date-modal">${item.day}</p>
