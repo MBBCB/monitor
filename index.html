@@ -191,6 +191,7 @@
     font-size: 20px;
   }
   
+  
   .modal-div{
 	background-color: yellow;
 	margin: 10px;
@@ -212,7 +213,7 @@
 
 <nav>
   <ul>
-    <li><a href="index.html">Online & Batch Schedule</a></li>
+    <li><a href="monitor.html">Online & Batch Schedule</a></li>
   </ul>
 </nav>
 
@@ -234,7 +235,6 @@ document.addEventListener("DOMContentLoaded", function() {
   let nearestDateIndex = -1;
   
   // Find the nearest date
-
   schedule.forEach((item, index) => {
     const [day, date] = item.day.split(', ');
     const formattedDate = new Date(date + ", 2024");
@@ -251,7 +251,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const usersString = item.users.join(', ');
     
     // Add only if the date is after or equal to today's date
-    if (formattedDate >= today) {
+    if (formattedDate >= today || formattedDate.toDateString() === today.toDateString()) {
       const dayDiv = document.createElement('div');
       dayDiv.classList.add('day');
       dayDiv.dataset.date = dateString;
@@ -265,45 +265,51 @@ document.addEventListener("DOMContentLoaded", function() {
       if (index === nearestDateIndex) {
         dayDiv.classList.add('nearest-date');
       }
-		
-
       
       dayDiv.addEventListener('click', function() {
         // Open modal and display information
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
-        modalContent.innerHTML = `
-          <p class="date-modal">${item.day}</p>
-		  <div class='modal-div'>
-		  <p class="session-modal"><b>SESSION 1 : 0000 - 0700 : BATCH</b></p>
-		  <p class="session-modal"><b>SESSION 2 : 0700 - 1300 : ONLINE</b></p>
-		  <p class="session-modal"><b>SESSION 3 : 1300 - 1900 : ONLINE</b></p>
-		  </div>
-        `;
+        const modalDivId = formattedDate.getDay() === 0 ? 'weekend' : 'weekday';
+		const session1Timing = formattedDate.getDay() === 0 ? '0000 - 0530' : '0000 - 0700';
+		const session2Timing = formattedDate.getDay() === 0 ? '0530 - 1300' : '0700 - 1300';
+
+		modalContent.innerHTML = `
+			<p class="date-modal">${item.day}</p>
+			<p class="date-modal">Today's Date: ${today.toDateString()}</p>
+			<div class='row-div'>
+				<div class='modal-div' id='${modalDivId}'>
+					<p class="session-modal"><b>SESSION 1 : ${session1Timing} : BATCH</b></p>
+					<p class="session-modal"><b>SESSION 2 : ${session2Timing} : ONLINE</b></p>
+					${formattedDate.getDay() !== 0 ? '<p class="session-modal"><b>SESSION 3 : 1300 - 1900 : ONLINE</b></p>' : ''}
+				</div>
+			</div>
+		`;
+
         
-		
         // Split users into separate <p> elements
         item.users.forEach((user, index) => {
-		const userParagraph = document.createElement('p');
-		userParagraph.innerHTML = `<strong>Session ${index + 1}: </strong>${user}`;
-		modalContent.appendChild(userParagraph);
-	});
+          const userParagraph = document.createElement('p');
+          userParagraph.innerHTML = `<strong>Session ${index + 1}: </strong>${user}`;
+          modalContent.appendChild(userParagraph);
+        });
 
-			modal.style.display = 'block';
-		});
-			  
-		  calendarContainer.appendChild(dayDiv);
-		}
-	  });
-	  
-	  // Close modal when clicking on close button
-	  const closeButton = document.querySelector('.close');
-	  closeButton.addEventListener('click', function() {
-		const modal = document.getElementById('modal');
-		modal.style.display = 'none';
-	  });
-	});
+        modal.style.display = 'block';
+      });
+      
+      calendarContainer.appendChild(dayDiv);
+    }
+  });
+  
+  // Close modal when clicking on close button
+  const closeButton = document.querySelector('.close');
+  closeButton.addEventListener('click', function() {
+    const modal = document.getElementById('modal');
+    modal.style.display = 'none';
+  });
+});
 </script>
+
 
 
 </body>
