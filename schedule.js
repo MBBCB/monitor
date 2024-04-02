@@ -2,38 +2,38 @@
 
     // April
     { day: "Monday, April 1", users: ["CA", "DC", "Reshma"] },
-    { day: "Tuesday, April 2", users: ["SAFE", "Janina", "SVG"] },
+    { day: "Tuesday, April 2", users: ["Wildan", "Janina", "SVG"] },
 	
     { day: "Sunday, April 7", users: ["RCMS", "GCIF", "GCIF"] },
     { day: "Monday, April 8", users: ["Ajijee", "GCIF", "GCIF"] },
     { day: "Tuesday, April 9", users: ["SVG", "DC", "Gan"] },
 	
     { day: "Sunday, April 14", users: ["DC", "CA", "SVG"] },
-    { day: "Monday, April 15", users: ["CA", "SAFE", "RCMS"] },
+    { day: "Monday, April 15", users: ["CA", "Siti", "RCMS"] },
     { day: "Tuesday, April 16", users: ["Jon", "GCIF", "GCIF"] },
 	
-    { day: "Sunday, April 21", users: ["SAFE", "Fatin", "CA"] },
-    { day: "Monday, April 22", users: ["CA", "SVG", "SAFE"] },
-    { day: "Tuesday, April 23", users: ["RCMS", "DC", "gan"] },
+    { day: "Sunday, April 21", users: ["Siti", "Fatin", "CA"] },
+    { day: "Monday, April 22", users: ["CA", "SVG", "Calvin"] },
+    { day: "Tuesday, April 23", users: ["RCMS", "DC", "Gan"] },
 	
     { day: "Sunday, April 28", users: ["SVG", "RCMS", "CA"] },
-    { day: "Monday, April 29", users: ["CA", "Reshma", "SAFE"] },
-    { day: "Tuesday, April 30", users: ["DC", "SAFE", "SVG"] },
+    { day: "Monday, April 29", users: ["CA", "Reshma", "Siti"] },
+    { day: "Tuesday, April 30", users: ["DC", "Wildan", "SVG"] },
 
     // May
-    { day: "Sunday, May 5", users: ["FD", "SAFE", "RCMS"] },
+    { day: "Sunday, May 5", users: ["FD", "Calvin", "RCMS"] },
     { day: "Monday, May 6", users: ["CA", "SVG", "DC"] },
-    { day: "Tuesday, May 7", users: ["SAFE", "RCMS", "CA"] },
+    { day: "Tuesday, May 7", users: ["Wildan", "RCMS", "CA"] },
 	
     { day: "Sunday, May 12", users: ["RCMS", "DC", "SVG"] },
-    { day: "Monday, May 13", users: ["CA", "FD", "SAFE"] },
+    { day: "Monday, May 13", users: ["CA", "FD", "Calvin"] },
     { day: "Tuesday, May 14", users: ["SVG", "CA", "DC"] },
 	
-    { day: "Sunday, May 19", users: ["DC", "SAFE", "FD"] },
+    { day: "Sunday, May 19", users: ["DC", "Wildan", "FD"] },
     { day: "Monday, May 20", users: ["CA", "SVG", "DC"] },
     { day: "Tuesday, May 21", users: ["FD", "RCMS", "CA"] },
 	
-    { day: "Sunday, May 26", users: ["SAFE", "GCIF", "GCIF"] },
+    { day: "Sunday, May 26", users: ["Siti", "GCIF", "GCIF"] },
     { day: "Monday, May 27", users: ["CA", "GCIF", "GCIF"] },
     { day: "Tuesday, May 28", users: ["DC", "CA", "RCMS"] },
 
