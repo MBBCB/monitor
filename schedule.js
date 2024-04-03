@@ -21,7 +21,7 @@
     { day: "Tuesday, April 30", users: ["DC", "Wildan", "SVG"] },
 
     // May
-    { day: "Sunday, May 5", users: ["FD", "Calvin", "RCMS"] },
+    { day: "Sunday, May 5", users: ["Fatin", "Calvin", "RCMS"] },
     { day: "Monday, May 6", users: ["CA", "SVG", "DC"] },
     { day: "Tuesday, May 7", users: ["Wildan", "RCMS", "CA"] },
 	
