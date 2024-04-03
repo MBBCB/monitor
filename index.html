@@ -217,13 +217,13 @@
 		  border-radius: 50%;
 		  color: white;
 		  cursor: pointer;
-		  font-size: 24px; /* Icon size */
-		  padding: 20px 20px; /* Adjust size as needed */
+		  font-size: 20px; /* Adjust if necessary to scale the "X" appropriately */
+		  padding: 20px 20px; /* Adjust padding to ensure the "X" is centered */
 		  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 		}
 
 		#fab:hover {
-		  background-color: #f54260; /* Darker shade for hover effect */
+		  background-color: #0056b3; /* Darker shade for hover effect */
 		}
 		
 		/* Enhanced Search Bar Styles */
@@ -365,46 +365,101 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
   
-  // Close modal when clicking on close button
-  const closeButton = document.querySelector('.close');
-  closeButton.addEventListener('click', function() {
-    const modal = document.getElementById('modal');
-    modal.style.display = 'none';
-  });
+		  // Close modal when clicking on close button
+		  const closeButton = document.querySelector('.close');
+		  closeButton.addEventListener('click', function() {
+			const modal = document.getElementById('modal');
+			modal.style.display = 'none';
+		  });
 
-  // Display the search container
-  document.getElementById('fab').addEventListener('click', function() {
-    document.getElementById('search-container').style.display = 'flex';
-  });
+		  // Display the search container
+		  document.getElementById('fab').addEventListener('click', function() {
+			document.getElementById('search-container').style.display = 'flex';
+		  });
 
-  // Hide the search container when clicking outside the search bar
-  document.getElementById('search-container').addEventListener('click', function(event) {
-    if (event.target.id !== 'search-bar') {
-      document.getElementById('search-container').style.display = 'none';
-    }
-  });
+		  // Hide the search container when clicking outside the search bar
+		  document.getElementById('search-container').addEventListener('click', function(event) {
+			if (event.target.id !== 'search-bar') {
+			  document.getElementById('search-container').style.display = 'none';
+			}
+		  });
 
-  // Prevent closing when clicking the search bar
-  document.getElementById('search-bar').addEventListener('click', function(event) {
-    event.stopPropagation();
-  });
+		  // Prevent closing when clicking the search bar
+		  document.getElementById('search-bar').addEventListener('click', function(event) {
+			event.stopPropagation();
+		  });
 
-  // Search functionality
-  document.getElementById('search-bar').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const calendarDays = document.querySelectorAll('#calendar .day');
+		  // Search functionality
+		  document.getElementById('search-bar').addEventListener('input', function(e) {
+			const searchTerm = e.target.value.toLowerCase();
+			const calendarDays = document.querySelectorAll('#calendar .day');
 
-    calendarDays.forEach(day => {
-      const users = day.querySelector('.users').textContent.toLowerCase();
-      if (users.includes(searchTerm) || searchTerm === '') {
-        day.style.display = 'block'; // Show the day if a user matches the search term or if the search term is empty
-      } else {
-        day.style.display = 'none'; // Hide the day if no users match the search term
-      }
-    });
-  });
+			calendarDays.forEach(day => {
+			  const users = day.querySelector('.users').textContent.toLowerCase();
+			  if (users.includes(searchTerm) || searchTerm === '') {
+				day.style.display = 'block'; // Show the day if a user matches the search term or if the search term is empty
+			  } else {
+				day.style.display = 'none'; // Hide the day if no users match the search term
+			  }
+			});
+		  });
 
-});
+		});
+
+		// Reference to the FAB and search bar elements
+		const fab = document.getElementById('fab');
+		const searchBar = document.getElementById('search-bar');
+
+		// Flag to track if a search has been performed
+		let searchPerformed = false;
+
+		document.getElementById('search-bar').addEventListener('input', function(e) {
+		  const searchTerm = e.target.value.toLowerCase();
+		  const calendarDays = document.querySelectorAll('#calendar .day');
+
+		  // Check if search term is not empty and update searchPerformed flag
+		  searchPerformed = searchTerm.length > 0;
+
+		  // Change FAB icon to "X" if search has been performed
+		  fab.innerHTML = searchPerformed ? '&#10005;' : '&#128269;'; // X : Magnifying glass
+
+		  calendarDays.forEach(day => {
+			const users = day.querySelector('.users').textContent.toLowerCase();
+			if (users.includes(searchTerm) || searchTerm === '') {
+			  day.style.display = 'block';
+			} else {
+			  day.style.display = 'none';
+			}
+		  });
+		});
+
+		// Modify FAB click event listener
+		fab.addEventListener('click', function() {
+		  if (searchPerformed) {
+			// Clear the search and show all events
+			searchBar.value = '';
+			searchPerformed = false;
+			fab.innerHTML = '&#128269;'; // Reset to magnifying glass icon
+			document.getElementById('search-container').style.display = 'none';
+			
+			// Trigger the input event manually to reset the calendar view
+			searchBar.dispatchEvent(new Event('input'));
+		  } else {
+			// Show the search container
+			document.getElementById('search-container').style.display = 'flex';
+		  }
+		});
+
+		document.getElementById('search-container').addEventListener('click', function(event) {
+		  if (event.target.id !== 'search-bar') {
+			document.getElementById('search-container').style.display = 'none';
+			// Reset FAB to search icon if the search box is empty
+			if (!searchPerformed) {
+			  fab.innerHTML = '&#128269;'; // Magnifying glass
+			}
+		  }
+		});
+
 </script>
 
 
