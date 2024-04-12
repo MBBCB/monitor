@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Queue Login</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background-color: #f4f4f9; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input, button {
+            margin: 10px;
+            padding: 8px;
+            width: 90%;
+        }
+        .queue-display {
+            font-size: 24px;
+            color: #4A90E2;
+            margin: 20px;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="queueDisplay" class="hidden">
+            <div>Your Queue Number:</div>
+            <div class="queue-display" id="queueNumber"></div>
+            <button onclick="resetForm()">Get New Queue Number</button>
+        </div>
+        <div id="loginForm">
+            <h2>User Login</h2>
+            <input type="text" id="pfNumber" placeholder="Enter PF Number" minlength="8" maxlength="8" pattern="^[0-9]{8}$" title="PF Number must be exactly 8 digits">
+            <input type="text" id="name" placeholder="Enter Name">
+            <button onclick="addToQueue()">Get Queue Number</button>
+        </div>
+        <div id="userMessage"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const queue = JSON.parse(localStorage.getItem('queue') || '[]');
+            const currentQueue = queue.find(item => item.pfNumber === localStorage.getItem('currentPF') && item.name === localStorage.getItem('currentName'));
+
+            if (currentQueue) {
+                document.getElementById('queueNumber').innerText = currentQueue.queueNumber;
+                document.getElementById('queueDisplay').classList.remove('hidden');
+                document.getElementById('loginForm').classList.add('hidden');
+            } else {
+                document.getElementById('queueDisplay').classList.add('hidden');
+                document.getElementById('loginForm').classList.remove('hidden');
+            }
+        });
+
+        function addToQueue() {
+            const pfNumber = document.getElementById('pfNumber').value;
+            const name = document.getElementById('name').value;
+            if (!pfNumber || !name) {
+                document.getElementById('userMessage').innerText = "Both fields are required!";
+                return;
+            }
+            if (pfNumber.length !== 8) {
+                document.getElementById('userMessage').innerText = "PF Number must be exactly 8 digits.";
+                return;
+            }
+            const queue = JSON.parse(localStorage.getItem('queue') || '[]');
+            const queueNumber = queue.length + 1;
+            queue.push({ pfNumber, name, queueNumber });
+            localStorage.setItem('queue', JSON.stringify(queue));
+            localStorage.setItem('currentPF', pfNumber);
+            localStorage.setItem('currentName', name);
+            document.getElementById('queueNumber').innerText = queueNumber;
+            document.getElementById('queueDisplay').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('userMessage').innerText = '';
+        }
+
+        function resetForm() {
+            localStorage.removeItem('currentPF');
+            localStorage.removeItem('currentName');
+            document.getElementById('pfNumber').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('queueDisplay').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

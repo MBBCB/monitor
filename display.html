@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Queue Display Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .current-queue {
+            font-size: 48px;
+            color: #4A90E2;
+            margin: 20px;
+            font-weight: bold;
+        }
+        .upcoming-queues {
+            font-size: 24px;
+            color: #333;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="currentQueue" class="current-queue"></div>
+        <div id="upcomingQueues" class="upcoming-queues"></div>
+    </div>
+
+    <script>
+        function refreshQueueDisplay() {
+            const queue = JSON.parse(localStorage.getItem('queue') || '[]').sort((a, b) => a.queueNumber - b.queueNumber);
+            if (queue.length > 0) {
+                document.getElementById('currentQueue').innerText = `Current Queue Number: ${queue[0].queueNumber}`;
+                const upcoming = queue.slice(1, 4);
+                let upcomingText = 'Upcoming Queues: ';
+                upcoming.forEach((item, index) => {
+                    upcomingText += `${item.queueNumber}${index < upcoming.length - 1 ? ', ' : ''}`;
+                });
+                document.getElementById('upcomingQueues').innerText = upcomingText;
+            } else {
+                document.getElementById('currentQueue').innerText = 'No current queues';
+                document.getElementById('upcomingQueues').innerText = '';
+            }
+        }
+
+        setInterval(refreshQueueDisplay, 5000); // Refresh display every 5 seconds
+
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'queue') {
+                refreshQueueDisplay();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', refreshQueueDisplay);
+    </script>
+</body>
+</html>
