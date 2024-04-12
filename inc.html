@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incremental Chance Game</title>
+<style>
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    font-family: 'Comic Neue', cursive;
+}
+
+button {
+    background-color: red;
+    border: none;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    transition: all 0.1s;
+}
+
+button:active {
+    transform: scale(0.95);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+.status {
+    position: absolute;
+    top: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+#restartButton {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: green;
+    color: white;
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#highestScore {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    color: #333;
+    font-size: 18px;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('gameButton');
+    const restartButton = document.getElementById('restartButton');
+    const statusText = document.getElementById('status');
+    const highestScoreDisplay = document.getElementById('highestScore');
+    let percentage = 1;
+    let highestPercentage = 0;
+
+    button.addEventListener('click', function() {
+        const roll = Math.random() * 100;
+        if (roll < percentage) {
+            statusText.textContent = `${percentage}% - Game Over!`;
+            button.disabled = true;
+            restartButton.style.display = 'block';
+            if (percentage > highestPercentage) {
+                highestPercentage = percentage;
+                highestScoreDisplay.textContent = `Highest %: ${highestPercentage}%`;
+            }
+        } else {
+            percentage += 1;
+            statusText.textContent = `${percentage}%`;
+        }
+    });
+
+    restartButton.addEventListener('click', function() {
+        percentage = 1;
+        button.disabled = false;
+        statusText.textContent = `${percentage}%`;
+        restartButton.style.display = 'none';
+    });
+});
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<button id="gameButton">Click</button>
+<div class="status" id="status">1%</div>
+<button id="restartButton">Restart</button>
+<div id="highestScore">Highest %: 0%</div>
+</body>
+</html>
