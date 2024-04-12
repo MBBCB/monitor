@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Incremental Chance Game</title>
+<title>Incremental Chance Game with Chart</title>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body {
     display: flex;
@@ -55,22 +57,54 @@ button:active {
     cursor: pointer;
 }
 
-#highestScore {
+.scoreboard {
     position: fixed;
     bottom: 20px;
     left: 20px;
     color: #333;
     font-size: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.scoreboard > div {
+    margin-bottom: 5px;
+}
+
+.chartContainer {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    width: 300px;
+    height: 200px;
+    display: none; /* Initially hidden */
 }
 </style>
+</head>
+<body>
+<button id="gameButton">Click</button>
+<div class="status" id="status">1%</div>
+<button id="restartButton">Restart</button>
+<div class="scoreboard">
+    <div id="highestScore">Highest %: 0%</div>
+    <div id="averageScore">Average %: 0.00%</div>
+</div>
+<div class="chartContainer">
+    <canvas id="scoreChart"></canvas>
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const button = document.getElementById('gameButton');
     const restartButton = document.getElementById('restartButton');
+    const chartContainer = document.querySelector('.chartContainer');
     const statusText = document.getElementById('status');
     const highestScoreDisplay = document.getElementById('highestScore');
+    const averageScoreDisplay = document.getElementById('averageScore');
     let percentage = 1;
     let highestPercentage = 0;
+    let totalPercentage = 0;
+    let gamesPlayed = 0;
+    let scores = [];
 
     button.addEventListener('click', function() {
         const roll = Math.random() * 100;
@@ -78,6 +112,12 @@ document.addEventListener('DOMContentLoaded', function() {
             statusText.textContent = `${percentage}% - Game Over!`;
             button.disabled = true;
             restartButton.style.display = 'block';
+            chartContainer.style.display = 'block'; // Show the chart container
+            gamesPlayed++;
+            totalPercentage += percentage;
+            scores.push(percentage);
+            updateChart();
+            averageScoreDisplay.textContent = `Average %: ${(totalPercentage / gamesPlayed).toFixed(2)}%`;
             if (percentage > highestPercentage) {
                 highestPercentage = percentage;
                 highestScoreDisplay.textContent = `Highest %: ${highestPercentage}%`;
@@ -94,14 +134,34 @@ document.addEventListener('DOMContentLoaded', function() {
         statusText.textContent = `${percentage}%`;
         restartButton.style.display = 'none';
     });
+
+    const ctx = document.getElementById('scoreChart').getContext('2d');
+    const scoreChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Scores',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    function updateChart() {
+        scoreChart.data.labels.push(`Game ${gamesPlayed}`);
+        scoreChart.data.datasets[0].data.push(percentage);
+        scoreChart.update();
+    }
 });
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-<button id="gameButton">Click</button>
-<div class="status" id="status">1%</div>
-<button id="restartButton">Restart</button>
-<div id="highestScore">Highest %: 0%</div>
 </body>
 </html>
