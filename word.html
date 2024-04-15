@@ -70,10 +70,18 @@
         background-color: #28a745;
     }
 
+    #categoryHeader {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        font-size: 20px;
+        color: #007BFF;
+    }
+
     #wordToGuess {
         margin: 20px 0;
         font-size: 24px;
-        letter-spacing: 14px;
+        letter-spacing: 2px; /* Reduced spacing */
     }
 
     #lives {
@@ -158,6 +166,7 @@
         <button class="topic-button" onclick="startGame('geography')">Geography</button>
     </div>
 </div>
+<div id="categoryHeader">You are playing: <span id="categoryName">Choose a Topic</span></div>
 <button id="refreshButton" onclick="showModal()">Choose Topic</button>
 <div id="congratulations">Congratulations! Great job!</div>
 <div id="lives" class="hearts-container"></div>
@@ -195,7 +204,7 @@ let lives = 5;
 let selectedWord;
 let guessedLetters;
 let currentTopic;
-let points = parseInt(localStorage.getItem('points')) || 0;
+let points = parseInt(localStorage.getItem('points')) || 0; // Initialize or retrieve saved points
 
 document.getElementById('pointsDisplay').textContent = 'Points: ' + points;
 
@@ -211,8 +220,10 @@ function hideModal() {
 
 function startGame(topic) {
     currentTopic = topic;
+    document.getElementById('categoryName').textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
     selectedWord = topics[topic][Math.floor(Math.random() * topics[topic].length)];
     guessedLetters = selectedWord.split('').map(char => char === ' ' ? ' ' : '_');
+    lives = 5; // Reset lives for the new game
     updateWordDisplay();
     updateLivesDisplay();
     createKeyboard();
@@ -244,7 +255,7 @@ function handleGuess(letter) {
     let correct = false;
     selectedWord.toLowerCase().split('').forEach((char, index) => {
         if (char === letter && guessedLetters[index] === '_') {
-            guessedLetters[index] = selectedWord.charAt(index);
+            guessedLetters[index] = selectedWord.charAt(index); // Update with the correct letter
             correct = true;
         }
     });
@@ -280,26 +291,27 @@ function endGame() {
     document.getElementById('wordToGuess').textContent = 'Game Over! The word was: ' + selectedWord;
     document.getElementById('keyboard').style.display = 'none';
     document.getElementById('retryButton').style.display = 'inline';
-    if (lives === 0 && points > 0) adjustPoints(-1);
+    if (lives === 0 && points > 0) adjustPoints(-1); // Deduct points if no lives left
 }
 
 function resetGame() {
     lives = 5;
-    startGame(currentTopic);
+    startGame(currentTopic); // Restart the game with the same topic
     document.getElementById('congratulations').style.display = 'none';
 }
 
 function winGame() {
-    adjustPoints(lives);
+    adjustPoints(lives); // Add points equal to the number of remaining lives
     document.getElementById('congratulations').style.display = 'block';
     document.getElementById('retryButton').style.display = 'inline';
 }
 
 function adjustPoints(value) {
     points += value;
-    localStorage.setItem('points', points);
+    localStorage.setItem('points', points); // Save points to local storage
     document.getElementById('pointsDisplay').textContent = 'Points: ' + points;
 }
 </script>
+
 </body>
 </html>
