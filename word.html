@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Guessing Game</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f9;
+        margin: 0;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    #modalContent {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .topic-button {
+        padding: 10px 20px;
+        margin: 10px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #refreshButton, #pointsDisplay {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #pointsDisplay {
+        top: auto;
+        bottom: 20px;
+        background-color: #28a745;
+    }
+
+    #wordToGuess {
+        margin: 20px 0;
+        font-size: 24px;
+        letter-spacing: 14px;
+    }
+
+    #lives {
+        margin-top: 10px;
+        font-size: 24px;
+        color: #f44336;
+    }
+
+    #keyboard, .keyboard-row {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .key {
+        margin: 5px;
+        padding: 10px;
+        background-color: #e0e0e0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        min-width: 30px; /* Ensure minimum touch area */
+    }
+
+    .key.correct {
+        background-color: #4caf50;
+        color: white;
+    }
+
+    .key.wrong {
+        background-color: #f44336;
+        color: white;
+    }
+
+    .heart {
+        color: red;
+        font-size: 24px;
+    }
+
+    #congratulations {
+        display: none;
+        margin-top: 20px;
+        font-size: 24px;
+        color: #4caf50;
+        background-color: #f4f4f9;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    #retryButton {
+        display: none;
+        margin-top: 20px;
+        font-size: 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 10px 20px;
+    }
+
+    #retryButton:hover {
+        background-color: #218838;
+    }
+
+    /* Media query for smaller screens */
+    @media (max-width: 600px) {
+        .key {
+            padding: 8px 6px; /* Smaller padding for smaller screens */
+            font-size: 14px; /* Smaller font size for keys */
+        }
+    }
+</style>
+</head>
+<body>
+<div id="modal">
+    <div id="modalContent">
+        <p>Select a topic to start the game:</p>
+        <button class="topic-button" onclick="startGame('fruits')">Fruits</button>
+        <button class="topic-button" onclick="startGame('celebrities')">Celebrities</button>
+        <button class="topic-button" onclick="startGame('geography')">Geography</button>
+    </div>
+</div>
+<button id="refreshButton" onclick="showModal()">Choose Topic</button>
+<div id="congratulations">Congratulations! Great job!</div>
+<div id="lives" class="hearts-container"></div>
+<div id="wordToGuess"></div>
+<div id="keyboard"></div>
+<button id="retryButton" onclick="resetGame()">Retry</button>
+<div id="pointsDisplay">Points: 0</div>
+<script>
+const topics = {
+    fruits: [
+        "apple", "apricot", "avocado", "banana", "blackberry", "blueberry", "boysenberry", "cherry", "coconut", "cranberry", 
+        "date", "dragonfruit", "durian", "elderberry", "fig", "grape", "grapefruit", "guava", "honeydew", "jackfruit",
+        "kiwi", "kumquat", "lemon", "lime", "lychee", "mango", "melon", "nectarine", "orange", "papaya",
+        "peach", "pear", "persimmon", "pineapple", "plum", "pomegranate", "quince", "raspberry", "red currant", "star fruit",
+        "strawberry", "tangerine", "ugli fruit", "watermelon", "white currant", "yuzu", "zucchini", "passion fruit", "miracle fruit", "jambul",
+        "jabuticaba", "huckleberry", "gooseberry", "feijoa", "damson", "clementine", "chokeberry", "calamondin", "blood orange", "bilberry"
+    ],
+    celebrities: [
+        "Adele", "Brad Pitt", "Celine Dion", "Drake", "Emma Watson", "Freddie Mercury", "Gwen Stefani", "Hugh Jackman", "Idris Elba", "Jennifer Aniston",
+        "Keanu Reeves", "Lady Gaga", "Meryl Streep", "Nick Jonas", "Oprah Winfrey", "P!nk", "Quentin Tarantino", "Rihanna", "Scarlett Johansson", "Tom Hanks",
+        "Usher", "Vin Diesel", "Will Smith", "Xzibit", "Yoko Ono", "Zac Efron", "Taylor Swift", "Sylvester Stallone", "Reese Witherspoon", "Queen Latifah",
+        "Penelope Cruz", "Orlando Bloom", "Natalie Portman", "Matt Damon", "Lionel Messi", "Kim Kardashian", "Justin Timberlake", "Ian McKellen", "Halle Berry", "George Clooney",
+        "Faith Hill", "Eminem", "Dwayne Johnson", "Christina Aguilera", "Beyoncé", "Arnold Schwarzenegger", "Angelina Jolie", "Amitabh Bachchan", "Al Pacino", "Julia Roberts"
+    ],
+    geography: [
+        "Amazon", "Baltic Sea", "Caribbean", "Danube", "Everest", "Fiji", "Ganges", "Himalayas", "Istanbul", "Java",
+        "Kilimanjaro", "London", "Mississippi", "Nile", "Ohio", "Pacific", "Quebec", "Rhine", "Sahara", "Tokyo",
+        "Ural Mountains", "Venice", "Wellington", "Xiamen", "Yangtze", "Zurich", "Athens", "Berlin", "Cairo", "Dublin",
+        "Edinburgh", "Florence", "Geneva", "Havana", "Innsbruck", "Johannesburg", "Kyoto", "Lisbon", "Moscow", "New York",
+        "Oslo", "Paris", "Quito", "Rome", "Stockholm", "Tahiti", "Ulaanbaatar", "Vienna", "Warsaw", "Xian",
+        "Yosemite", "Zagreb", "Antarctica", "Black Forest", "Colorado", "Dead Sea"
+    ]
+};
+let lives = 5;
+let selectedWord;
+let guessedLetters;
+let currentTopic;
+let points = parseInt(localStorage.getItem('points')) || 0;
+
+document.getElementById('pointsDisplay').textContent = 'Points: ' + points;
+
+function showModal() {
+    document.getElementById('modal').style.visibility = 'visible';
+    document.getElementById('modal').style.opacity = 1;
+}
+
+function hideModal() {
+    document.getElementById('modal').style.visibility = 'hidden';
+    document.getElementById('modal').style.opacity = 0;
+}
+
+function startGame(topic) {
+    currentTopic = topic;
+    selectedWord = topics[topic][Math.floor(Math.random() * topics[topic].length)];
+    guessedLetters = selectedWord.split('').map(char => char === ' ' ? ' ' : '_');
+    updateWordDisplay();
+    updateLivesDisplay();
+    createKeyboard();
+    hideModal();
+    document.getElementById('keyboard').style.display = 'flex';
+    document.getElementById('retryButton').style.display = 'none';
+}
+
+function createKeyboard() {
+    const keyboardRows = ["abcdefghij", "klmnopqrs", "tuvwxyz"];
+    document.getElementById('keyboard').innerHTML = '';
+    keyboardRows.forEach(createKeyboardRow);
+}
+
+function createKeyboardRow(row) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'keyboard-row';
+    row.split('').forEach(letter => {
+        const button = document.createElement('button');
+        button.textContent = letter;
+        button.onclick = () => handleGuess(letter);
+        button.className = 'key';
+        rowDiv.appendChild(button);
+    });
+    document.getElementById('keyboard').appendChild(rowDiv);
+}
+
+function handleGuess(letter) {
+    let correct = false;
+    selectedWord.toLowerCase().split('').forEach((char, index) => {
+        if (char === letter && guessedLetters[index] === '_') {
+            guessedLetters[index] = selectedWord.charAt(index);
+            correct = true;
+        }
+    });
+    updateWordDisplay();
+    document.querySelectorAll('.key').forEach(button => {
+        if (button.textContent === letter) {
+            button.classList.add(correct ? 'correct' : 'wrong');
+            button.disabled = true;
+        }
+    });
+    if (!correct) {
+        lives--;
+        updateLivesDisplay();
+        if (lives === 0) endGame();
+    }
+    if (!guessedLetters.includes('_')) winGame();
+}
+
+function updateWordDisplay() {
+    document.getElementById('wordToGuess').textContent = guessedLetters.join(' ');
+}
+
+function updateLivesDisplay() {
+    const livesContainer = document.getElementById('lives');
+    livesContainer.innerHTML = '';
+    for (let i = 0; i < lives; i++) {
+        livesContainer.innerHTML += '❤️';
+    }
+    if (lives === 0) endGame();
+}
+
+function endGame() {
+    document.getElementById('wordToGuess').textContent = 'Game Over! The word was: ' + selectedWord;
+    document.getElementById('keyboard').style.display = 'none';
+    document.getElementById('retryButton').style.display = 'inline';
+    if (lives === 0 && points > 0) adjustPoints(-1);
+}
+
+function resetGame() {
+    lives = 5;
+    startGame(currentTopic);
+    document.getElementById('congratulations').style.display = 'none';
+}
+
+function winGame() {
+    adjustPoints(lives);
+    document.getElementById('congratulations').style.display = 'block';
+    document.getElementById('retryButton').style.display = 'inline';
+}
+
+function adjustPoints(value) {
+    points += value;
+    localStorage.setItem('points', points);
+    document.getElementById('pointsDisplay').textContent = 'Points: ' + points;
+}
+</script>
+</body>
+</html>
