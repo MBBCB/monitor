@@ -13,7 +13,7 @@
     { day: "Tuesday, April 16", users: ["Jon", "GCIF", "GCIF"] },
 	
     { day: "Sunday, April 21", users: ["Siti", "Fatin", "YeongWei"] },
-    { day: "Monday, April 22", users: ["Prashant", "SVG", "Calvin"] },
+    { day: "Monday, April 22", users: ["Prashant", "Huda", "Calvin"] },
     { day: "Tuesday, April 23", users: ["RCMS", "DC", "Gan"] },
 	
     { day: "Sunday, April 28", users: ["SVG", "RCMS", "Janina"] },
