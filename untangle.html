@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untangle Program</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e0f7fa;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #00796b;
+        }
+        textarea {
+            width: calc(100% - 30px); /* Adjust width to account for padding */
+            height: 100px;
+            margin: 0 auto 20px auto; /* Center the textarea with auto margins */
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #b2dfdb;
+            border-radius: 10px;
+            resize: none;
+            font-family: inherit;
+            overflow-y: auto;
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #00796b;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #f1f8e9;
+            border: 2px solid #c8e6c9;
+            border-radius: 10px;
+            position: relative;
+            max-height: 100px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .copy-btn {
+            background-color: #00796b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #004d40;
+        }
+        .copied-message {
+            display: none;
+            color: #00796b;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Untangle Program</h2>
+    <textarea id="input" placeholder="Enter the tangled input here..."></textarea>
+    <button onclick="untangle()">Untangle</button>
+    <button onclick="clearInput()">Clear</button>
+    <div class="output" id="output">
+        <div id="result"></div>
+    </div>
+    <button class="copy-btn" onclick="copyOutput()">Copy Output</button>
+    <div class="copied-message" id="copiedMessage">Output copied to clipboard!</div>
+</div>
+
+<script>
+    function untangle() {
+        const input = document.getElementById('input').value.trim().split('\n');
+        const outputDiv = document.getElementById('result');
+        let result = '';
+        
+        for (let i = 0; i < input.length; i++) {
+            // Skip any non-data lines
+            if (!input[i].trim() || input[i].trim().startsWith('-')) {
+                continue;
+            }
+
+            if (i + 1 < input.length && input[i + 1] && !input[i + 1].trim().startsWith('-')) {
+                const row1 = input[i].trim();
+                const row2 = input[i + 1].trim();
+                
+                if (row1.length !== row2.length) {
+                    continue; // Skip this pair if rows are not of the same length
+                }
+
+                let untangled = '';
+                for (let j = 0; j < row1.length; j++) {
+                    untangled += row1[j] + row2[j];
+                }
+                result += untangled + '\n';
+                i++; // Skip the next line as it has been processed
+            }
+        }
+
+        outputDiv.innerText = result.trim();
+    }
+
+    function clearInput() {
+        document.getElementById('input').value = '';
+    }
+
+    function copyOutput() {
+        const result = document.getElementById('result').innerText;
+        navigator.clipboard.writeText(result).then(() => {
+            const copiedMessage = document.getElementById('copiedMessage');
+            copiedMessage.style.display = 'block';
+            setTimeout(() => {
+                copiedMessage.style.display = 'none';
+            }, 2000);
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+</script>
+
+</body>
+</html>
