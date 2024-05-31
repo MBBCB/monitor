@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Schedule Calendar</title>
+<style>
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 5; /* Increased z-index to appear above other elements */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+	nav {
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  width: 100%;
+	  height:fixed;
+	  background-color: #333;
+	  padding: 10px 0;
+	  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	  z-index: 10;
+	  font-family: Arial, sans-serif;
+	}
+
+	nav ul {
+	  list-style-type: none;
+	  margin: 0;
+	  padding: 0;
+	  text-align: center;
+	}
+
+	nav ul li {
+	  display: inline;
+	}
+
+	nav ul li a {
+	  display: inline-block;
+	  color: #fff;
+	  text-decoration: none;
+	  padding: 10px 20px;
+	  transition: all 0.3s ease;
+	  margin-left: 10%;
+	  margin-right: 10%;
+	}
+
+
+
+
+
+
+  /* Calendar */
+  #calendar {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(25%, 1fr));
+    gap: 5px;
+    font-family: Arial, sans-serif;
+  }
+
+  .day {
+    border: 1px solid #ccc;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    background-color: #fff;
+    text-align: center;
+    margin: 5px;
+    border-radius: 5px;
+  }
+
+  .day:hover {
+    background-color: #f0f0f0;
+  }
+
+  .date {
+    font-size: 18px;
+    font-weight: bold;
+    color: #555;
+  }
+
+  .day-name {
+    font-size: 14px;
+    color: #999;
+  }
+
+  .users {
+    font-size: 12px;
+    color: #777;
+  }
+
+  /* Nearest date styling */
+  .nearest-date {
+    transform: scale(1);
+    border-width: 2px;
+    background-color: #f54260 ;
+  }
+  .nearest-date .day-name {
+    color: white;
+  }
+  .nearest-date .users {
+    color: white;
+  }
+  .nearest-date:hover {
+    border-width: 2px;
+    background-color: #e84f69 ;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 5;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-info {
+  margin-bottom: 10px;
+    }
+
+  .modal-info strong {
+    font-weight: bold;
+    margin-right: 5px;
+  }
+
+  .modal-info:last-child {
+    margin-bottom: 0; /* Remove margin-bottom for the last element */
+  }
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .date-modal {
+    font-size: 40px;
+  }
+  
+   .session-modal {
+    font-size: 20px;
+  }
+  
+  
+  .modal-div{
+	background-color: yellow;
+	margin: 10px;
+	padding: 20px;
+	border-radius: 20px;
+  }
+  
+  /* Floating Action Button Styles */
+		#fab-container {
+		  position: fixed;
+		  bottom: 20px;
+		  right: 20px;
+		  z-index: 20; /* Ensure it's above other content */
+		}
+
+		#fab {
+		  background-color: #f54260; /* Change this color as needed */
+		  border: none;
+		  border-radius: 50%;
+		  color: white;
+		  cursor: pointer;
+		  font-size: 20px; /* Adjust if necessary to scale the "X" appropriately */
+		  padding: 20px 20px; /* Adjust padding to ensure the "X" is centered */
+		  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+		}
+
+		#fab:hover {
+		  background-color: #0056b3; /* Darker shade for hover effect */
+		}
+		
+		/* Enhanced Search Bar Styles */
+		#search-container {
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		  width: 100%;
+		  height: 100%;
+		  background-color: rgba(0,0,0,0.4); /* Semi-transparent background */
+		  display: flex;
+		  justify-content: center;
+		  align-items: center;
+		  z-index: 30; /* Ensure it's above all other content */
+		}
+
+		#search-bar {
+		  border: 2px solid #007BFF; /* Blue border for more visibility */
+		  border-radius: 20px; /* Rounded corners for a modern look */
+		  padding: 10px 20px;
+		  font-size: 16px;
+		  outline: none;
+		  width: 80%; /* Responsive width */
+		  max-width: 500px; /* Maximum width to maintain usability */
+		  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+		}
+
+
+
+
+
+  /* Mobile responsiveness */
+  @media (max-width: 600px) {
+    .day {
+      font-size: 14px;
+      padding: 5px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <ul>
+    <li><a href="index.html">Online & Batch Schedule</a></li>
+  </ul>
+</nav>
+
+<br><br><br>
+
+<div id="calendar"></div>
+
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<div id="fab-container">
+  <button id="fab" aria-label="Search">&#128269;</button> <!-- This is the Unicode for a magnifying glass icon -->
+</div>
+
+<div id="search-container" style="display:none;">
+  <input type="text" id="search-bar" placeholder="Search...">
+</div>
+
+
+<script src="schedule.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const today = new Date();
+  const calendarContainer = document.getElementById('calendar');
+  let nearestDateIndex = -1;
+  
+  // Find the nearest date
+  schedule.forEach((item, index) => {
+    const [day, date] = item.day.split(', ');
+    const formattedDate = new Date(date + ", 2024");
+    if (formattedDate >= today && (nearestDateIndex === -1 || formattedDate < new Date(schedule[nearestDateIndex].day.split(', ')[1] + ", 2024"))) {
+      nearestDateIndex = index;
+    }
+  });
+  
+  // Generate calendar
+  schedule.forEach((item, index) => {
+    const [day, date] = item.day.split(', ');
+    const formattedDate = new Date(date + ", 2024");
+    const dateString = formattedDate.toISOString().split('T')[0];
+    const usersString = item.users.join(', ');
+    
+    // Add only if the date is after or equal to today's date
+    if (formattedDate >= today || formattedDate.toDateString() === today.toDateString()) {
+      const dayDiv = document.createElement('div');
+      dayDiv.classList.add('day');
+      dayDiv.dataset.date = dateString;
+      dayDiv.innerHTML = `
+        <div class="date">${date}</div>
+        <div class="day-name">${day}</div>
+        <div class="users">${usersString}</div>
+      `;
+      
+      // Apply special styling for the nearest date
+      if (index === nearestDateIndex) {
+        dayDiv.classList.add('nearest-date');
+      }
+      
+      dayDiv.addEventListener('click', function() {
+        // Open modal and display information
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalDivId = formattedDate.getDay() === 0 ? 'weekend' : 'weekday';
+        const session1Timing = formattedDate.getDay() === 0 ? '0000 - 0530' : '0000 - 0700';
+        const session2Timing = formattedDate.getDay() === 0 ? '0530 - 1300' : '0700 - 1300';
+
+        modalContent.innerHTML = `
+          <p class="date-modal">${item.day}</p>
+          <p class="date-modal">Today's Date: ${today.toDateString()}</p>
+          <div class='row-div'>
+            <div class='modal-div' id='${modalDivId}'>
+              <p class="session-modal"><b>SESSION 1 : ${session1Timing} : BATCH</b></p>
+              <p class="session-modal"><b>SESSION 2 : ${session2Timing} : ONLINE</b></p>
+              <p class="session-modal"><b>SESSION 3 : 1300 - 1900 : ONLINE</b></p>
+            </div>
+          </div>
+        `;
+
+        // Split users into separate <p> elements
+        item.users.forEach((user, index) => {
+          const userParagraph = document.createElement('p');
+          userParagraph.innerHTML = `<strong>Session ${index + 1}: </strong>${user}`;
+          modalContent.appendChild(userParagraph);
+        });
+
+        modal.style.display = 'block';
+      });
+      
+      calendarContainer.appendChild(dayDiv);
+    }
+  });
+  
+		  // Close modal when clicking on close button
+		  const closeButton = document.querySelector('.close');
+		  closeButton.addEventListener('click', function() {
+			const modal = document.getElementById('modal');
+			modal.style.display = 'none';
+		  });
+
+		  // Display the search container
+		  document.getElementById('fab').addEventListener('click', function() {
+			document.getElementById('search-container').style.display = 'flex';
+		  });
+
+		  // Hide the search container when clicking outside the search bar
+		  document.getElementById('search-container').addEventListener('click', function(event) {
+			if (event.target.id !== 'search-bar') {
+			  document.getElementById('search-container').style.display = 'none';
+			}
+		  });
+
+		  // Prevent closing when clicking the search bar
+		  document.getElementById('search-bar').addEventListener('click', function(event) {
+			event.stopPropagation();
+		  });
+
+		  // Search functionality
+		  document.getElementById('search-bar').addEventListener('input', function(e) {
+			const searchTerm = e.target.value.toLowerCase();
+			const calendarDays = document.querySelectorAll('#calendar .day');
+
+			calendarDays.forEach(day => {
+			  const users = day.querySelector('.users').textContent.toLowerCase();
+			  if (users.includes(searchTerm) || searchTerm === '') {
+				day.style.display = 'block'; // Show the day if a user matches the search term or if the search term is empty
+			  } else {
+				day.style.display = 'none'; // Hide the day if no users match the search term
+			  }
+			});
+		  });
+
+		});
+
+		// Reference to the FAB and search bar elements
+		const fab = document.getElementById('fab');
+		const searchBar = document.getElementById('search-bar');
+
+		// Flag to track if a search has been performed
+		let searchPerformed = false;
+
+		document.getElementById('search-bar').addEventListener('input', function(e) {
+		  const searchTerm = e.target.value.toLowerCase();
+		  const calendarDays = document.querySelectorAll('#calendar .day');
+
+		  // Check if search term is not empty and update searchPerformed flag
+		  searchPerformed = searchTerm.length > 0;
+
+		  // Change FAB icon to "X" if search has been performed
+		  fab.innerHTML = searchPerformed ? '&#10005;' : '&#128269;'; // X : Magnifying glass
+
+		  calendarDays.forEach(day => {
+			const users = day.querySelector('.users').textContent.toLowerCase();
+			if (users.includes(searchTerm) || searchTerm === '') {
+			  day.style.display = 'block';
+			} else {
+			  day.style.display = 'none';
+			}
+		  });
+		});
+
+		// Modify FAB click event listener
+		fab.addEventListener('click', function() {
+		  if (searchPerformed) {
+			// Clear the search and show all events
+			searchBar.value = '';
+			searchPerformed = false;
+			fab.innerHTML = '&#128269;'; // Reset to magnifying glass icon
+			document.getElementById('search-container').style.display = 'none';
+			
+			// Trigger the input event manually to reset the calendar view
+			searchBar.dispatchEvent(new Event('input'));
+		  } else {
+			// Show the search container
+			document.getElementById('search-container').style.display = 'flex';
+		  }
+		});
+
+		document.getElementById('search-container').addEventListener('click', function(event) {
+		  if (event.target.id !== 'search-bar') {
+			document.getElementById('search-container').style.display = 'none';
+			// Reset FAB to search icon if the search box is empty
+			if (!searchPerformed) {
+			  fab.innerHTML = '&#128269;'; // Magnifying glass
+			}
+		  }
+		});
+
+</script>
+
+
+
+
+</body>
+</html>
