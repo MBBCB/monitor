@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBMz BASIC Assembly Coding Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        section {
+            margin-bottom: 20px;
+        }
+
+        #challenge-code div {
+            margin: 10px 0;
+        }
+
+        input[type="text"] {
+            width: 60px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 16px;
+            margin-right: 5px;
+            text-transform: uppercase;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .correct {
+            background-color: #e8f5e9;
+            border-color: #4CAF50;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #progress-tracker {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #notification-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            color: white;
+            z-index: 1000;
+        }
+
+        #notification-banner.correct {
+            background-color: #4CAF50;
+        }
+
+        #notification-banner.incorrect {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IBMz BASIC Assembly Coding Game</h1>
+    </header>
+    <div id="notification-banner"></div>
+    <main>
+        <section id="challenge">
+            <h2>Challenge</h2>
+            <p id="challenge-description"></p>
+            <div id="challenge-code"></div>
+        </section>
+        <section id="editor">
+            <button id="submit-code">Submit Code</button>
+        </section>
+        <section id="output">
+            <h2>Output</h2>
+            <pre id="output-result"></pre>
+        </section>
+        <section id="progress">
+            <h2>Progress</h2>
+            <p id="progress-tracker"></p>
+        </section>
+    </main>
+    <script>
+        const challenges = [
+            {
+                description: "Fill in the blanks to add two numbers and store the result of 5 .",
+                code: [
+                    "______ R1, 2",
+                    "L R2, ______",
+                    "______ R1, R2",
+                    "ST ______ , RESULT",
+                    "DISPLAY ______ ('This not for actual display') "
+                ],
+                answers: ["L", "3", "A", "R1", "RESULT"],
+                expectedOutput: "Result: 5"
+            },
+            {
+                description: "Fill in the blanks to subtract two numbers and store the result of 2.",
+                code: [
+                    "______ R1, 5",
+                    "L R2, ______",
+                    "______ R1, R2",
+                    "ST ______ , RESULT",
+                    "DISPLAY ______ ('This not for actual display') "
+                ],
+                answers: ["L", "3", "S", "R1", "RESULT"],
+                expectedOutput: "Result: 2"
+            },
+            {
+                description: "Fill in the blanks to multiply two numbers and store the result 20 packed.",
+                code: [
+                    "______ R1, 4",
+                    "L R2, ______",
+                    "______ R1, R2",
+                    "ST ______ , RESULT",
+                    "DISPLAY ______ ('This not for actual display') "
+                ],
+                answers: ["L", "5", "MP", "R1", "RESULT"],
+                expectedOutput: "Result: 20"
+            },
+            {
+                description: "Fill in the blanks to divide two numbers and store the result of 5 packed.",
+                code: [
+                    "______ R1, 10",
+                    "L R2, ______",
+                    "______ R1, R2",
+                    "ST ______ , RESULT",
+                    "DISPLAY ______ ('This not for actual display') "
+                ],
+                answers: ["L", "2", "DP", "R1", "RESULT"],
+                expectedOutput: "Result: 5"
+            },
+            {
+                description: "Fill in the blanks to load a value into R3 and store the result of 7.",
+                code: [
+                    "______ R3, ______",
+                    "ST ______ , RESULT",
+                    "DISPLAY ______ ('This not for actual display') "
+                ],
+                answers: ["L", "7", "R3", "RESULT"],
+                expectedOutput: "Result: 7"
+            },
+        ];
+
+        let currentChallengeIndex = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadChallenge(currentChallengeIndex);
+
+            document.getElementById("submit-code").addEventListener("click", () => {
+                const inputs = document.querySelectorAll("#challenge-code input");
+                const userAnswers = Array.from(inputs).map(input => input.value.trim().toUpperCase());
+                const isCorrect = checkUserAnswers(userAnswers);
+                const output = isCorrect ? challenges[currentChallengeIndex].expectedOutput : "Error: Incorrect code.";
+                document.getElementById("output-result").textContent = output;
+                updateProgress(isCorrect, userAnswers);
+                showNotificationBanner(isCorrect);
+            });
+        });
+
+        function loadChallenge(index) {
+            const challenge = challenges[index];
+            const challengeCodeDiv = document.getElementById("challenge-code");
+            const challengeDescriptionP = document.getElementById("challenge-description");
+            challengeDescriptionP.textContent = challenge.description;
+            challengeCodeDiv.innerHTML = "";
+            challenge.code.forEach((line, i) => {
+                const div = document.createElement("div");
+                const parts = line.split("______");
+                div.innerHTML = parts[0];
+                if (parts.length > 1) {
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.dataset.index = i;
+                    div.appendChild(input);
+                    div.innerHTML += parts[1];
+                }
+                challengeCodeDiv.appendChild(div);
+            });
+            document.getElementById("output-result").textContent = "";
+            document.getElementById("progress-tracker").textContent = `Progress: ${currentChallengeIndex + 1}/${challenges.length}`;
+        }
+
+        function checkUserAnswers(userAnswers) {
+            const challenge = challenges[currentChallengeIndex];
+            return challenge.answers.every((answer, i) => answer === userAnswers[i]);
+        }
+
+        function updateProgress(isCorrect, userAnswers) {
+            const challenge = challenges[currentChallengeIndex];
+            if (isCorrect) {
+                userAnswers.forEach((answer, i) => {
+                    const input = document.querySelector(`#challenge-code input[data-index="${i}"]`);
+                    input.classList.add("correct");
+                });
+                currentChallengeIndex++;
+                if (currentChallengeIndex < challenges.length) {
+                    setTimeout(() => loadChallenge(currentChallengeIndex), 2000);
+                } else {
+                    document.getElementById("progress-tracker").textContent = "Congratulations! You completed all challenges.";
+                }
+            }
+        }
+
+        function showNotificationBanner(isCorrect) {
+            const banner = document.getElementById("notification-banner");
+            banner.textContent = isCorrect ? "Correct!" : "Incorrect!";
+            banner.className = isCorrect ? "correct" : "incorrect";
+            banner.style.display = "block";
+            setTimeout(() => {
+                banner.style.display = "none";
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
