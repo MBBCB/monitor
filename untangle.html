@@ -14,6 +14,7 @@
             height: 100vh;
             background-color: #e0f7fa;
             margin: 0;
+            overflow: hidden; /* Prevent body scroll when history panel is open */
         }
         .container {
             background: white;
@@ -86,6 +87,62 @@
             margin-top: 10px;
             font-size: 14px;
         }
+        .history-panel {
+            position: fixed;
+            left: -500px;
+            top: 0;
+            height: 100%;
+            width: 300px;
+            background-color: #ffffff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            transition: left 0.3s;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .history-panel.open {
+            left: 0;
+        }
+        .history-button {
+            position: fixed;
+            top: 20px;
+            left: 215px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 1001;
+        }
+        .history-button:hover {
+            background-color: #004d40;
+        }
+        .history-button::before {
+            content: 'History';
+        }
+        .history-button::after {
+            content: '➔';
+            margin-left: 5px;
+        }
+        .history-panel.open + .history-button::after {
+            content: '←';
+        }
+        .history-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f1f8e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item button {
+            margin-left: 10px;
+            padding: 5px 10px;
+        }
     </style>
 </head>
 <body>
@@ -102,14 +159,22 @@
     <div class="copied-message" id="copiedMessage">Output copied to clipboard!</div>
 </div>
 
+<div class="history-panel" id="historyPanel">
+    <h3>History</h3>
+    <div id="historyContent"></div>
+    <button onclick="clearHistory()">Clear History</button>
+</div>
+<button class="history-button" id="historyButton" onclick="toggleHistory()"></button>
+
 <script>
+    document.addEventListener('DOMContentLoaded', loadHistory);
+
     function untangle() {
         const input = document.getElementById('input').value.trim().split('\n');
         const outputDiv = document.getElementById('result');
         let result = '';
-        
+
         for (let i = 0; i < input.length; i++) {
-            // Skip any non-data lines
             if (!input[i].trim() || input[i].trim().startsWith('-')) {
                 continue;
             }
@@ -117,9 +182,9 @@
             if (i + 1 < input.length && input[i + 1] && !input[i + 1].trim().startsWith('-')) {
                 const row1 = input[i].trim();
                 const row2 = input[i + 1].trim();
-                
+
                 if (row1.length !== row2.length) {
-                    continue; // Skip this pair if rows are not of the same length
+                    continue;
                 }
 
                 let untangled = '';
@@ -127,11 +192,13 @@
                     untangled += row1[j] + row2[j];
                 }
                 result += untangled + '\n';
-                i++; // Skip the next line as it has been processed
+                i++;
             }
         }
 
-        outputDiv.innerText = result.trim();
+        result = result.trim();
+        outputDiv.innerText = result;
+        saveToHistory(result);
     }
 
     function clearInput() {
@@ -149,6 +216,59 @@
         }).catch(err => {
             console.error('Could not copy text: ', err);
         });
+    }
+
+    function copyText(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const copiedMessage = document.getElementById('copiedMessage');
+            copiedMessage.style.display = 'block';
+            setTimeout(() => {
+                copiedMessage.style.display = 'none';
+            }, 2000);
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    function toggleHistory() {
+        const historyPanel = document.getElementById('historyPanel');
+        const historyButton = document.getElementById('historyButton');
+        historyPanel.classList.toggle('open');
+        historyButton.classList.toggle('open');
+    }
+
+    function saveToHistory(result) {
+        if (!result) return;
+
+        let history = JSON.parse(localStorage.getItem('untangleHistory')) || [];
+        history.push(result);
+        localStorage.setItem('untangleHistory', JSON.stringify(history));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        const historyContent = document.getElementById('historyContent');
+        historyContent.innerHTML = '';
+
+        let history = JSON.parse(localStorage.getItem('untangleHistory')) || [];
+
+        history.forEach(item => {
+            const historyItem = document.createElement('div');
+            historyItem.classList.add('history-item');
+            historyItem.innerText = item;
+
+            const copyButton = document.createElement('button');
+            copyButton.innerText = 'Copy';
+            copyButton.onclick = () => copyText(item);
+
+            historyItem.appendChild(copyButton);
+            historyContent.appendChild(historyItem);
+        });
+    }
+
+    function clearHistory() {
+        localStorage.removeItem('untangleHistory');
+        loadHistory();
     }
 </script>
 
