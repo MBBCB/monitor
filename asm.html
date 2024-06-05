@@ -183,6 +183,11 @@
         description: "Branch on Overflow - Branches to a specified address if an overflow occurs.",
         example: "// Assembly Code Example:\n// Branches to the address specified by LABEL if an overflow occurs.\nBO LABEL\nLABEL DC A(ADDRESS)\nADDRESS DC A(LABEL)"
     },
+		{
+		name: "BZ",
+		description: "Branch on Zero - Branches to a specified address if the value in a register is zero.",
+		example: "// Assembly Code Example:\n// Branches to the address specified by LABEL if the value in register 1 is zero.\nBZ LABEL\nLABEL DC A(ADDRESS)\nADDRESS DC A(LABEL)"
+	},
     {
         name: "CL",
         description: "Compare Logical - Compares two logical values.",
@@ -423,6 +428,11 @@
         description: "Unpack - Converts packed decimal data to zoned decimal format.",
         example: "// Assembly Code Example:\n// Unpacks the packed decimal value at SOURCE into zoned decimal format at TARGET.\nUNPK TARGET, SOURCE\nSOURCE DC PL2'1234'\nTARGET DS ZL5"
     },
+	{
+		name: "XC",
+		description: "Exclusive Or Character - Performs a bitwise XOR on a character in memory and a register.",
+		example: "// Assembly Code Example:\n// Performs a bitwise XOR on the character at the address specified by LABEL and the value in register 1, storing the result in register 1.\nXC R1, LABEL\nLABEL DC C'X'"
+	},
     {
         name: "XR",
         description: "Exclusive Or Register - Performs a bitwise XOR on the values in two registers.",
