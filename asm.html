@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBMz BASIC Assembly Instructions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+        }
+        .search-bar {
+            flex: 0 0 auto;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center; /* Center the search bar */
+        }
+        .search-bar input {
+            width: calc(100% - 40px); /* Adjust width to keep margins consistent */
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .instructions {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .instruction {
+            margin-bottom: 15px;
+			font-size: 12px;
+        }
+        .instruction h3 {
+            margin: 0 0 5px;
+        }
+        .instruction p {
+            margin: 0 0 5px;
+            white-space: pre-wrap; /* Preserve line breaks and white spaces */
+        }
+        .instruction code {
+            display: block;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #8fbc8f;
+            white-space: pre; /* Preserve formatting for code */
+        }
+        /* Custom Scrollbar */
+        .instructions::-webkit-scrollbar {
+            width: 12px;
+        }
+        .instructions::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 10px;
+        }
+        .instructions::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 10px;
+            border: 3px solid #333;
+        }
+        .instructions::-webkit-scrollbar-thumb:hover {
+            background-color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-bar">
+            <input type="text" id="searchBar" placeholder="Search for instructions...">
+        </div>
+        <div class="instructions" id="instructionsContainer"></div>
+    </div>
+    <script>
+        const instructions = [
+    {
+        name: "A",
+        description: "Add - Adds the value in a general register to the value at a specified memory location.",
+        example: "// Assembly Code Example:\n// Adds the value at the address in register 1 to the value in register 2, storing the result in register 1.\nA R1, VALUE\nVALUE DC F'5'"
+    },
+    {
+        name: "AD",
+        description: "Add Long - Adds two long values (double words).",
+        example: "// Assembly Code Example:\n// Adds the long value at the address in register 1 to the long value in register 2, storing the result in register 1.\nAD R1, LONGVAL\nLONGVAL DC D'12345678901234567890'"
+    },
+    {
+        name: "AE",
+        description: "Add Short - Adds two short values (halfwords).",
+        example: "// Assembly Code Example:\n// Adds the short value at the address in register 1 to the short value in register 2, storing the result in register 1.\nAE R1, SHORTVAL\nSHORTVAL DC H'1000'"
+    },
+    {
+        name: "AH",
+        description: "Add Halfword - Adds a halfword (16-bit) value to a register.",
+        example: "// Assembly Code Example:\n// Adds the halfword value at the address in register 1 to the value in register 2, storing the result in register 1.\nAH R1, HALFWORDVAL\nHALFWORDVAL DC H'500'"
+    },
+    {
+        name: "AP",
+        description: "Add Packed - Adds two packed decimal values.",
+        example: "// Assembly Code Example:\n// Adds the packed decimal value at the address in register 1 to the packed decimal value in register 2, storing the result in register 1.\nAP PACKED1, PACKED2\nPACKED1 DC P'1234'\nPACKED2 DC P'5678'"
+    },
+    {
+        name: "AR",
+        description: "Add Register - Adds the values in two registers.",
+        example: "// Assembly Code Example:\n// Adds the value in register 2 to the value in register 1, storing the result in register 1.\nAR R1, R2"
+    },
+    {
+        name: "AW",
+        description: "Add Unnormalized - Adds two unnormalized values.",
+        example: "// Assembly Code Example:\n// Adds the unnormalized value at the address in register 1 to the unnormalized value in register 2, storing the result in register 1.\nAW R1, UNNORMALIZEDVAL\nUNNORMALIZEDVAL DC F'999'"
+    },
+	{
+        name: "B",
+        description: "Branch - Branches to a specified address.",
+        example: "// Assembly Code Example:\n// Branches to the address specified by LABEL.\nB LABEL\nLABEL DC A(ADDRESS)\nADDRESS DC A(LABEL)"
+    },
+	{
+        name: "BH",
+        description: "Branch on High - Branches to a specified address if the high condition code is set.",
+        example: "// Assembly Code Example:\n// Branches to the address specified by LABEL if the high condition code is set.\nBH LABEL\nLABEL DC A(ADDRESS)\nADDRESS DC A(LABEL)"
+    },
+    {
+        name: "BL",
+        description: "Branch on Low - Branches to a specified address if the low condition code is set.",
+        example: "// Assembly Code Example:\n// Branches to the address specified by LABEL if the low condition code is set.\nBL LABEL\nLABEL DC A(ADDRESS)\nADDRESS DC A(LABEL)"
+    },
+    {
+        name: "BC",
+        description: "Branch on Condition - Branches to a specified address based on a condition code.",
+        example: "// Assembly Code Example:\n// Branches to the address specified by LABEL if the condition code is zero (equal).\nBC 8, LABEL\nLABEL DS 0H"
+    },
+    {
+        name: "BCR",
+        description: "Branch on Condition Register - Branches to a specified address based on a condition code stored in a register.",
+        example: "// Assembly Code Example:\n// Branches to the address specified by register 1 if the condition code is zero (equal).\nBCR 8, R1"
+    },
+    {
+        name: "BCTR",
+        description: "Branch on Count Register - Branches to a specified address based on the count stored in a register.",
+        example: "// Assembly Code Example:\n// Decrements the value in register 1 and branches to the address in register 2 if the result is not zero.\nBCTR R1, R2"
+    },
+    {
+        name: "BAL",
+        description: "Branch and Link - Branches to a specified address and saves the return address in a register.",
+        example: "// Assembly Code Example:\n// Branches to the address specified by LABEL and saves the return address in register 14.\nBAL R14, LABEL\nLABEL DS 0H"
+    },
+    {
+        name: "BALR",
+        description: "Branch and Link Register - Branches to the address in a register and saves the return address in another register.",
+        example: "// Assembly Code Example:\n// Branches to the address in register 1 and saves the return address in register 14.\nBALR R14, R1"
+    },
+	{
+        name: "BER",
+        description: "Branch on Equal Register - Branches to the address in a register if the value in the specified register is equal.",
+        example: "// Assembly Code Example:\n// Branches to the address in register 2 if the value in register 1 is equal to the value in register 3.\nBER R2, R1, R3"
+    },
+	{
+        name: "BNE",
+        description: "Branch on Not Equal - Branches to a specified address if the values are not equal.",
+        example: "// Assembly Code Example:\n// Branches to the address specified by LABEL if the values are not equal.\nBNE LABEL\nLABEL DC A(ADDRESS)\nADDRESS DC A(LABEL)"
+    },
+    {
+        name: "BR",
+        description: "Branch - Branches to the address in a register.",
+        example: "// Assembly Code Example:\n// Branches to the address in register 1.\nBR R1"
+    },
+	{
+        name: "BO",
+        description: "Branch on Overflow - Branches to a specified address if an overflow occurs.",
+        example: "// Assembly Code Example:\n// Branches to the address specified by LABEL if an overflow occurs.\nBO LABEL\nLABEL DC A(ADDRESS)\nADDRESS DC A(LABEL)"
+    },
+    {
+        name: "CL",
+        description: "Compare Logical - Compares two logical values.",
+        example: "// Assembly Code Example:\n// Compares the value in register 1 with the value at the address specified by LABEL.\nCL R1, LABEL\nLABEL DC F'5'"
+    },
+    {
+        name: "CLC",
+        description: "Compare Logical Character - Compares two character strings.",
+        example: "// Assembly Code Example:\n// Compares the string at the address specified by STRING1 with the string at STRING2.\nCLC STRING1, STRING2\nSTRING1 DC C'ABC'\nSTRING2 DC C'ABC'"
+    },
+    {
+        name: "CLI",
+        description: "Compare Logical Immediate - Compares a value with an immediate value.",
+        example: "// Assembly Code Example:\n// Compares the value at the address specified by LABEL with the immediate value 10.\nCLI LABEL, 10\nLABEL DC F'5'"
+    },
+	{
+		name: "CNOP",
+		description: "Code NOP - Aligns the next instruction on a specified boundary.",
+		example: "// Assembly Code Example:\n// Aligns the next instruction on a halfword boundary.\nCNOP 0, 4"
+	},
+	{
+		name: "CVBY",
+		description: "Convert to Binary - Converts a binary coded decimal (BCD) value to binary.",
+		example: "// Assembly Code Example:\n// Converts the BCD value at the address specified by LABEL to binary and stores it in register 1.\nCVBY R1, LABEL\nLABEL DC P'1234'"
+	},
+	{
+        name: "CP",
+        description: "Compare Packed - Compares two packed decimal values.",
+        example: "// Assembly Code Example:\n// Compares the packed decimal value at the address specified by PACKED1 with the packed decimal value at PACKED2.\nCP PACKED1, PACKED2\nPACKED1 DC PL2'1234'\nPACKED2 DC PL2'5678'"
+    },
+    {
+        name: "CR",
+        description: "Compare Register - Compares the values in two registers.",
+        example: "// Assembly Code Example:\n// Compares the value in register 1 with the value in register 2.\nCR R1, R2"
+    },
+    {
+        name: "CVB",
+        description: "Convert to Binary - Converts a packed decimal value to binary.",
+        example: "// Assembly Code Example:\n// Converts the packed decimal value at the address specified by LABEL to binary and stores it in register 1.\nCVB R1, LABEL\nLABEL DC P'1234'"
+    },
+    {
+        name: "CVD",
+        description: "Convert to Decimal - Converts a binary value to packed decimal.",
+        example: "// Assembly Code Example:\n// Converts the binary value in register 1 to packed decimal and stores it at the address specified by LABEL.\nCVD R1, LABEL\nLABEL DC P'0'"
+    },
+    {
+        name: "D",
+        description: "Divide - Divides two values.",
+        example: "// Assembly Code Example:\n// Divides the value in register 1 by the value at the address specified by LABEL, storing the result in register 1.\nD R1, LABEL\nLABEL DC F'5'"
+    },
+    {
+        name: "DP",
+        description: "Divide Packed - Divides two packed decimal values.",
+        example: "// Assembly Code Example:\n// Divides the packed decimal value at the address specified by LABEL by the value in register 1, storing the result in register 1.\nDP R1, LABEL\nLABEL DC P'1234'"
+    },
+    {
+        name: "DR",
+        description: "Divide Register - Divides the values in two registers.",
+        example: "// Assembly Code Example:\n// Divides the value in register 1 by the value in register 2, storing the result in register 1.\nDR R1, R2"
+    },
+    {
+        name: "ED",
+        description: "Edit - Formats data according to an edit pattern.",
+        example: "// Assembly Code Example:\n// Formats the value at the address specified by LABEL according to the edit pattern in EDITPATTERN.\nED LABEL, EDITPATTERN\nLABEL DC F'1234'\nEDITPATTERN DC C'ZZ,ZZ9'"
+    },
+    {
+        name: "EX",
+        description: "Execute - Executes an instruction at the address specified by an operand.",
+        example: "// Assembly Code Example:\n// Executes the instruction at the address specified by LABEL.\nEX R1, LABEL\nLABEL DC A(INSTRUCTION)\nINSTRUCTION DS 0H"
+    },
+    {
+        name: "IC",
+        description: "Insert Character - Inserts a character from memory into a register.",
+        example: "// Assembly Code Example:\n// Inserts the character at the address specified by LABEL into register 1.\nIC R1, LABEL\nLABEL DC C'A'"
+    },
+    {
+        name: "LA",
+        description: "Load Address - Loads an address into a register.",
+        example: "// Assembly Code Example:\n// Loads the address specified by LABEL into register 1.\nLA R1, LABEL\nLABEL DS 0H"
+    },
+    {
+        name: "L",
+        description: "Load - Loads a value from memory into a register.",
+        example: "// Assembly Code Example:\n// Loads the value at the address specified by LABEL into register 1.\nL R1, LABEL\nLABEL DC F'1234'"
+    },
+	{
+        name: "LH",
+        description: "Load Halfword - Loads a halfword (16-bit) value from memory into a register.",
+        example: "// Assembly Code Example:\n// Loads the halfword value at the address specified by LABEL into register 1.\nLH R1, LABEL\nLABEL DC H'500'"
+    },
+    {
+        name: "LR",
+        description: "Load Register - Loads a value from one register to another.",
+        example: "// Assembly Code Example:\n// Loads the value in register 2 into register 1.\nLR R1, R2"
+    },
+	{
+		name: "MV",
+		description: "Move - Moves data from one location to another.",
+		example: "// Assembly Code Example:\n// Moves the value at the address specified by LABEL to the address specified by TARGET.\nMV LABEL, TARGET\nLABEL DC F'1234'\nTARGET DS F"
+	},
+    {
+        name: "MVCL",
+        description: "Move Character Long - Moves a string of characters.",
+        example: "// Assembly Code Example:\n// Moves the string at the address specified by STRING1 to the address specified by STRING2.\nMVCL R1, R2\nSTRING1 DC C'HELLO'\nSTRING2 DS CL5"
+    },
+    {
+        name: "MVC",
+        description: "Move Character - Moves characters from one location to another.",
+        example: "// Assembly Code Example:\n// Moves the string at the address specified by STRING1 to the address specified by STRING2.\nMVC STRING1, STRING2\nSTRING1 DC C'HELLO'\nSTRING2 DS CL5"
+    },
+    {
+        name: "MVI",
+        description: "Move Immediate - Moves an immediate value to a location.",
+        example: "// Assembly Code Example:\n// Moves the immediate value 10 to the address specified by LABEL.\nMVI LABEL, 10\nLABEL DS 1C"
+    },
+	{
+        name: "MVO",
+        description: "Move with Offset - Moves a value from one location to another with an offset.",
+        example: "// Assembly Code Example:\n// Moves the value at the address specified by SOURCE with an offset to the address specified by TARGET.\nMVO SOURCE, TARGET, OFFSET\nSOURCE DS CL5\nTARGET DS CL5\nOFFSET DC H'2'"
+    },
+	{
+        name: "MVZ",
+        description: "Move Zone - Moves zoned decimal data from one location to another.",
+        example: "// Assembly Code Example:\n// Moves zoned decimal data from SOURCE to TARGET.\nMVZ SOURCE, TARGET\nSOURCE DS ZL5\nTARGET DS ZL5"
+    },
+    {
+        name: "N",
+        description: "And - Performs a bitwise AND on two values.",
+        example: "// Assembly Code Example:\n// Performs a bitwise AND on the value in register 1 and the value at the address specified by LABEL, storing the result in register 1.\nN R1, LABEL\nLABEL DC F'5'"
+    },
+    {
+        name: "NI",
+        description: "And Immediate - Performs a bitwise AND with an immediate value.",
+        example: "// Assembly Code Example:\n// Performs a bitwise AND on the value at the address specified by LABEL and the immediate value 10, storing the result at LABEL.\nNI LABEL, 10\nLABEL DC F'5'"
+    },
+	{
+		name: "NOP",
+		description: "No Operation - Does nothing, used for timing or alignment.",
+		example: "// Assembly Code Example:\n// Performs no operation.\nNOP"
+	},
+    {
+        name: "O",
+        description: "Or - Performs a bitwise OR on two values.",
+        example: "// Assembly Code Example:\n// Performs a bitwise OR on the value in register 1 and the value at the address specified by LABEL, storing the result in register 1.\nO R1, LABEL\nLABEL DC F'5'"
+    },
+    {
+        name: "OI",
+        description: "Or Immediate - Performs a bitwise OR with an immediate value.",
+        example: "// Assembly Code Example:\n// Performs a bitwise OR on the value at the address specified by LABEL and the immediate value 10, storing the result at LABEL.\nOI LABEL, 10\nLABEL DC F'5'"
+    },
+    {
+        name: "P",
+        description: "Pack - Packs a decimal value.",
+        example: "// Assembly Code Example:\n// Packs the decimal value at the address specified by DECIMAL into packed decimal format.\nP PACKED, DECIMAL\nPACKED DS PL2\nDECIMAL DC F'1234'"
+    },
+	{
+        name: "PACK",
+        description: "Pack - Converts zoned decimal data to packed decimal format.",
+        example: "// Assembly Code Example:\n// Packs the zoned decimal value at SOURCE into packed decimal format at TARGET.\nPACK TARGET, SOURCE\nSOURCE DC Z'1234'\nTARGET DS PL2"
+    },
+    {
+        name: "S",
+        description: "Subtract - Subtracts one value from another.",
+        example: "// Assembly Code Example:\n// Subtracts the value at the address specified by LABEL from the value in register 1, storing the result in register 1.\nS R1, LABEL\nLABEL DC F'5'"
+    },
+	{
+        name: "SH",
+        description: "Subtract Halfword - Subtracts a halfword (16-bit) value from a register.",
+        example: "// Assembly Code Example:\n// Subtracts the halfword value at the address in register 1 from the value in register 2, storing the result in register 1.\nSH R1, HALFWORDVAL\nHALFWORDVAL DC H'500'"
+    },
+	{
+        name: "SLL",
+        description: "Shift Left Logical - Shifts the bits in a register left logically by a specified number of positions.",
+        example: "// Assembly Code Example:\n// Shifts the bits in register 1 left logically by 2 positions.\nSLL R1, 2"
+    },
+    {
+        name: "STH",
+        description: "Store Halfword - Stores a halfword (16-bit) value from a register into memory.",
+        example: "// Assembly Code Example:\n// Stores the halfword value in register 1 at the address specified by LABEL.\nSTH R1, LABEL\nLABEL DS H"
+    },
+    {
+        name: "SR",
+        description: "Subtract Register - Subtracts the values in two registers.",
+        example: "// Assembly Code Example:\n// Subtracts the value in register 2 from the value in register 1, storing the result in register 1.\nSR R1, R2"
+    },
+	{
+		name: "SL",
+		description: "Shift Left - Shifts the bits in a register to the left.",
+		example: "// Assembly Code Example:\n// Shifts the bits in register 1 to the left by 2 positions.\nSL R1, 2"
+	},
+	{
+		name: "SRA",
+		description: "Shift Right Arithmetic - Shifts the bits in a register right arithmetically by a specified number of positions.",
+		example: "// Assembly Code Example:\n// Shifts the bits in register 1 right arithmetically by 2 positions.\nSRA R1, 2"
+	},
+	{
+		name: "SLR",
+		description: "Subtract Logical Register - Subtracts the logical values in two registers.",
+		example: "// Assembly Code Example:\n// Subtracts the logical value in register 2 from the logical value in register 1, storing the result in register 1.\nSLR R1, R2"
+	},
+	{
+		name: "SRL",
+		description: "Shift Right Logical - Shifts the bits in a register right logically by a specified number of positions.",
+		example: "// Assembly Code Example:\n// Shifts the bits in register 1 right logically by 2 positions.\nSRL R1, 2"
+	},
+    {
+        name: "ST",
+        description: "Store - Stores a value from a register into memory.",
+        example: "// Assembly Code Example:\n// Stores the value in register 1 at the address specified by LABEL.\nST R1, LABEL\nLABEL DS F"
+    },
+	{
+        name: "SPACE",
+        description: "Space - Adds space in the listing or output.",
+        example: "// Assembly Code Example:\n// Adds three lines of space.\nSPACE 3"
+    },
+    {
+        name: "STM",
+        description: "Store Multiple - Stores multiple registers into memory.",
+        example: "// Assembly Code Example:\n// Stores the values in registers 1 through 4 into memory starting at the address specified by LABEL.\nSTM R1, R4, LABEL\nLABEL DS 0F"
+    },
+    {
+        name: "TR",
+        description: "Translate - Translates characters.",
+        example: "// Assembly Code Example:\n// Translates the characters at the address specified by STRING1 according to the translation table at STRING2.\nTR STRING1, STRING2\nSTRING1 DC CL5'HELLO'\nSTRING2 DC CL5'ABCDE'"
+    },
+	{
+		name: "TRT",
+		description: "Translate and Test - Translates characters and tests for specific characters.",
+		example: "// Assembly Code Example:\n// Translates the characters at the address specified by STRING1 according to the translation table at STRING2, testing for specific characters.\nTRT STRING1, STRING2\nSTRING1 DC CL5'HELLO'\nSTRING2 DC CL5'ABCDE'"
+	},
+	{
+        name: "TM",
+        description: "Test Under Mask - Tests bits in a byte against a mask.",
+        example: "// Assembly Code Example:\n// Tests the bits in the byte at the address specified by LABEL against the mask in register 1.\nTM LABEL, MASK\nLABEL DC X'FF'\nMASK DC X'80'"
+    },
+	{
+        name: "UNPK",
+        description: "Unpack - Converts packed decimal data to zoned decimal format.",
+        example: "// Assembly Code Example:\n// Unpacks the packed decimal value at SOURCE into zoned decimal format at TARGET.\nUNPK TARGET, SOURCE\nSOURCE DC PL2'1234'\nTARGET DS ZL5"
+    },
+    {
+        name: "XR",
+        description: "Exclusive Or Register - Performs a bitwise XOR on the values in two registers.",
+        example: "// Assembly Code Example:\n// Performs a bitwise XOR on the value in register 1 and the value in register 2, storing the result in register 1.\nXR R1, R2"
+    },
+	{
+		name: "X",
+		description: "Exclusive Or - Performs a bitwise exclusive OR on two values.",
+		example: "// Assembly Code Example:\n// Performs a bitwise exclusive OR on the value in register 1 and the value at the address specified by LABEL, storing the result in register 1.\nX R1, LABEL\nLABEL DC F'5'"
+	},
+	{
+		name: "XI",
+		description: "Exclusive Or Immediate - Performs a bitwise exclusive OR with an immediate value.",
+		example: "// Assembly Code Example:\n// Performs a bitwise exclusive OR on the value at the address specified by LABEL and the immediate value 10, storing the result at LABEL.\nXI LABEL, 10\nLABEL DC F'5'"
+	},
+    {
+        name: "ZAP",
+        description: "Zero and Add Packed - Sets a value to zero and adds a packed decimal value.",
+        example: "// Assembly Code Example:\n// Sets the value at the address specified by PACKED1 to zero and adds the packed decimal value at PACKED2.\nZAP PACKED1, PACKED2\nPACKED1 DC PL2'0'\nPACKED2 DC PL2'1234'"
+    }
+];
+
+
+        const searchBar = document.getElementById('searchBar');
+        const instructionsContainer = document.getElementById('instructionsContainer');
+
+        function displayInstructions(instructionsToDisplay) {
+            instructionsContainer.innerHTML = '';
+            instructionsToDisplay.forEach(instruction => {
+                const instructionDiv = document.createElement('div');
+                instructionDiv.classList.add('instruction');
+
+                const title = document.createElement('h3');
+                title.textContent = instruction.name;
+
+                const description = document.createElement('p');
+                description.textContent = instruction.description;
+
+                const example = document.createElement('code');
+                example.textContent = instruction.example;
+
+                instructionDiv.appendChild(title);
+                instructionDiv.appendChild(description);
+                instructionDiv.appendChild(example);
+
+                instructionsContainer.appendChild(instructionDiv);
+            });
+        }
+
+        searchBar.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredInstructions = instructions.filter(instruction => 
+                instruction.name.toLowerCase().includes(searchTerm) ||
+                instruction.description.toLowerCase().includes(searchTerm)
+            );
+            displayInstructions(filteredInstructions);
+        });
+
+        // Initial display of instructions
+        displayInstructions(instructions);
+    </script>
+</body>
+</html>
