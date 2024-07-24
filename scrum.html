@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrum Story Point Estimation Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 5px 0;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        main {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stage {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #444;
+            border-radius: 10px;
+            background-color: #2b2b2b;
+        }
+
+        h2 {
+            color: #00bcd4;
+            font-size: 20px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #00bcd4;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0288d1;
+        }
+
+        .user-list, .user-list input {
+            display: inline-block;
+            margin: 5px;
+            color: #fff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fibonacci-buttons button {
+            margin: 5px;
+            background-color: #444;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .fibonacci-buttons button:hover {
+            background-color: #666;
+        }
+
+        .user-card {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+        }
+
+        .highlight {
+            background-color: #444;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+            color: #f4f4f4;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        input[type="text"]::placeholder, input[type="number"]::placeholder {
+            color: #888;
+        }
+
+        .highlighted-average {
+            color: #ff5722;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        #proceedButton {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #444;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #proceedButton:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
+        #proceedButton:enabled:hover {
+            background-color: #0288d1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h3>Scrum Story Point Estimation </h3>
+    </header>
+    <main>
+        <div id="userForm" class="stage">
+            <h2>Add Team</h2>
+            <input type="text" id="username" placeholder="Enter username">
+            <button onclick="addUser()">Add Team</button>
+            <div id="users"></div>
+            <button id="proceedButton" onclick="proceedToSelecting()" disabled>Start Selecting Stage</button>
+			
+			<br><br>
+			<a>Add all participating team members.</a>
+        </div>
+        <div id="selectingStage" class="stage hidden">
+            <h2>1. Selecting Stage</h2>
+            <div id="currentUser" class="user-card highlight"></div>
+            <div class="fibonacci-buttons" id="fibonacciButtons">
+                <button onclick="selectPoints(1)">1D</button>
+                <button onclick="selectPoints(3)">3D</button>
+                <button onclick="selectPoints(7)">7D</button>
+                <button onclick="selectPoints(14)">14D</button>
+                <button onclick="selectPoints(30)">30D</button>
+                <button onclick="selectPoints(60)">2M</button>
+                <button onclick="selectPoints(120)">4M</button>
+				<button onclick="selectPoints(240)">8M</button>
+            </div>
+            <button onclick="nextUser()" id="nextUserButton" class="hidden">Next User</button>
+			
+			<br><br>
+			<a>Dont tell your team your days. Explain why you think it takes the day you suggest.</a>
+			<br>
+			<a>Dont worry you will get the chance to change later.</a>
+        </div>
+        <div id="discussStage" class="stage hidden">
+            <h2>Discussion Period</h2>
+            <p>Discuss the points given and prepare for the reconsider stage.</p>
+            <button onclick="proceedToUpdating()">Proceed to Reconsider Stage</button>
+        </div>
+        <div id="updatingStage" class="stage hidden">
+            <h2>2. Reconsider Stage</h2>
+            <div id="currentUpdateUser" class="user-card highlight"></div>
+            <div class="fibonacci-buttons" id="updateFibonacciButtons">
+                <button onclick="selectUpdatePoints(1)">1D</button>
+                <button onclick="selectUpdatePoints(3)">3D</button>
+                <button onclick="selectUpdatePoints(7)">7D</button>
+                <button onclick="selectUpdatePoints(14)">14D</button>
+                <button onclick="selectUpdatePoints(30)">30D</button>
+                <button onclick="selectUpdatePoints(60)">2M</button>
+                <button onclick="selectUpdatePoints(120)">4M</button>
+				<button onclick="selectUpdatePoints(240)">8M</button>
+            </div>
+            <button onclick="skipUpdate()">Next</button>
+			<br><br>
+			<a>Press Next if you want to keep your original choice.</a>
+			<a>Press a new day and next if you want to change your choice.</a>
+        </div>
+        <div id="revealStage" class="stage hidden">
+            <h2>3. Reveal Stage</h2>
+            <div id="revealPoints"></div>
+            <div id="averagePoints" class="highlighted-average"></div>
+        </div>
+    </main>
+    <script>
+        let users = [];
+        let points = {};
+        let updatedPoints = {};
+        let currentUserIndex = 0;
+        let updatingUserIndex = 0;
+
+        function addUser() {
+            const username = document.getElementById('username').value.toUpperCase();
+            if (username && !users.includes(username)) {
+                users.push(username);
+                points[username] = null;
+                document.getElementById('username').value = '';
+                displayUsers();
+                if (users.length >= 2) {
+                    document.getElementById('proceedButton').disabled = false;
+                }
+            }
+        }
+
+        function displayUsers() {
+            const usersDiv = document.getElementById('users');
+            usersDiv.innerHTML = '';
+            users.forEach(user => {
+                usersDiv.innerHTML += `<div class="user-card">${user}</div>`;
+            });
+        }
+
+        function proceedToSelecting() {
+            if (users.length >= 2) {
+                document.getElementById('userForm').classList.add('hidden');
+                document.getElementById('selectingStage').classList.remove('hidden');
+                displayCurrentUser();
+            }
+        }
+
+        function displayCurrentUser() {
+            if (currentUserIndex < users.length) {
+                document.getElementById('currentUser').innerText = `User: ${users[currentUserIndex]}`;
+                document.getElementById('fibonacciButtons').style.display = 'block';
+                document.getElementById('nextUserButton').classList.add('hidden');
+            } else {
+                document.getElementById('selectingStage').classList.add('hidden');
+                document.getElementById('discussStage').classList.remove('hidden');
+            }
+        }
+
+        function selectPoints(point) {
+            const user = users[currentUserIndex];
+            points[user] = point;
+            document.getElementById('fibonacciButtons').style.display = 'none';
+            document.getElementById('nextUserButton').classList.remove('hidden');
+        }
+
+        function nextUser() {
+            currentUserIndex++;
+            displayCurrentUser();
+        }
+
+        function proceedToUpdating() {
+            document.getElementById('discussStage').classList.add('hidden');
+            document.getElementById('updatingStage').classList.remove('hidden');
+            displayCurrentUpdateUser();
+        }
+
+        function displayCurrentUpdateUser() {
+            if (updatingUserIndex < users.length) {
+                document.getElementById('currentUpdateUser').innerText = `User: ${users[updatingUserIndex]}`;
+                document.getElementById('updateFibonacciButtons').style.display = 'block';
+            } else {
+                document.getElementById('updatingStage').classList.add('hidden');
+                document.getElementById('revealStage').classList.remove('hidden');
+                displayRevealedPoints();
+                displayAveragePoints();
+            }
+        }
+
+        function selectUpdatePoints(point) {
+            const user = users[updatingUserIndex];
+            updatedPoints[user] = point;
+        }
+
+        function skipUpdate() {
+            updatingUserIndex++;
+            displayCurrentUpdateUser();
+        }
+
+        function displayRevealedPoints() {
+            const revealPointsDiv = document.getElementById('revealPoints');
+            revealPointsDiv.innerHTML = '';
+            users.forEach(user => {
+                const point = updatedPoints[user] || points[user];
+                revealPointsDiv.innerHTML += `<div class="user-card">${user}: ${point}</div>`;
+            });
+        }
+
+        function displayAveragePoints() {
+            const totalPoints = users.reduce((sum, user) => sum + (updatedPoints[user] || points[user]), 0);
+            const average = totalPoints / users.length;
+            document.getElementById('averagePoints').innerText = `Average Days: ${average.toFixed(2)}`;
+        }
+    </script>
+</body>
+</html>
