@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        nav {
+            background-color: #28a745;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        nav .logo {
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        input, button {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .results, .history {
+            margin-top: 20px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        #leave-remaining {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+        }
+
+        #history-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #history-list li {
+            background-color: #f1f1f1;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 600px) {
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            nav {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Leave Tracker</div>
+        <ul>
+            <li><a href="leave.html">Apply</a></li>
+            <li><a href="use.html">Track n USE</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <form id="leave-form">
+            <label for="work-date">Work Date:</label>
+            <input type="date" id="work-date" required>
+
+            <label for="work-hours">Work Hours:</label>
+            <input type="number" id="work-hours" min="0" max="24" step="0.1" required>
+
+            <button type="submit">Add Leave</button>
+        </form>
+
+        <div class="results">
+            <h2>Remaining Leave</h2>
+            <p id="leave-remaining">0.0 Days</p>
+        </div>
+
+        <div class="history">
+            <h2>Work History</h2>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let remainingLeave = parseFloat(localStorage.getItem('remainingLeave')) || 0;
+
+            const form = document.getElementById('leave-form');
+            const leaveRemainingDisplay = document.getElementById('leave-remaining');
+            const historyList = document.getElementById('history-list');
+
+            // Update the display for remaining leave on page load
+            leaveRemainingDisplay.textContent = `${remainingLeave.toFixed(1)} Days`;
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const workDate = new Date(document.getElementById('work-date').value);
+                const workHours = parseFloat(document.getElementById('work-hours').value);
+                const isWeekend = (workDate.getDay() === 0 || workDate.getDay() === 6);
+
+                let leaveEarned = calculateLeave(workHours, isWeekend);
+                remainingLeave += leaveEarned;
+
+                // Update the remaining leave in both UI and localStorage
+                leaveRemainingDisplay.textContent = `${remainingLeave.toFixed(1)} Days`;
+                localStorage.setItem('remainingLeave', remainingLeave.toFixed(1));
+                addHistory(workDate, workHours, leaveEarned);
+
+                // Save to localStorage
+                saveLeaveData(workDate, workHours, leaveEarned);
+            });
+
+            function calculateLeave(hours, isWeekend) {
+                if (isWeekend) {
+                    return hours > 4 ? 1 : 0.5;
+                } else {
+                    return hours > 6 ? 1 : 0.5;
+                }
+            }
+
+            function addHistory(workDate, workHours, leaveEarned) {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Worked on ${workDate.toDateString()} for ${workHours} hours. Earned ${leaveEarned} day(s) of leave.`;
+                historyList.appendChild(listItem);
+            }
+
+            function saveLeaveData(workDate, workHours, leaveEarned) {
+                const history = JSON.parse(localStorage.getItem('leaveHistory')) || [];
+                history.push({ workDate: workDate.toDateString(), workHours, leaveEarned });
+                localStorage.setItem('leaveHistory', JSON.stringify(history));
+            }
+
+            // Load previous leave data on page load
+            loadLeaveData();
+
+            function loadLeaveData() {
+                const history = JSON.parse(localStorage.getItem('leaveHistory')) || [];
+                history.forEach(item => {
+                    addHistory(new Date(item.workDate), item.workHours, item.leaveEarned);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
