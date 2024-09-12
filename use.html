@@ -113,6 +113,28 @@
             margin-bottom: 10px;
             padding: 10px;
             border-radius: 5px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #use-history-list li.retracted {
+            color: red;
+            background-color: #fdd;
+        }
+
+        .retract-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #007bff;
+            transition: color 0.3s ease;
+        }
+
+        .retract-btn:hover {
+            color: #0056b3;
         }
 
         @media (max-width: 600px) {
@@ -192,27 +214,63 @@
             // Update the remaining leave in both UI and localStorage
             leaveUsedDisplay.textContent = `${remainingLeave.toFixed(1)} Days`;
             localStorage.setItem('remainingLeave', remainingLeave.toFixed(1));
-            addHistory(selectedDate, leaveDaysUsed);
+            addHistory(selectedDate, leaveDaysUsed, false);
             saveUseData(selectedDate, leaveDaysUsed);
         });
 
-        function addHistory(date, leaveUsed) {
+        function addHistory(date, leaveUsed, isRetracted) {
             const listItem = document.createElement('li');
             listItem.textContent = `Leave applied for ${date}: ${leaveUsed} day(s) used.`;
+            if (isRetracted) {
+                listItem.classList.add('retracted');
+                listItem.textContent += ' Leave retracted.';
+            }
+            
+            const existingHistory = JSON.parse(localStorage.getItem('useHistory')) || [];
+            const alreadyRetracted = existingHistory.some(item => item.date === date && item.leaveUsed === leaveUsed && item.retracted);
+
+            if (!isRetracted && !alreadyRetracted) {
+                const retractButton = document.createElement('button');
+                retractButton.textContent = '🔄'; // Unicode refresh symbol
+                retractButton.className = 'retract-btn';
+                retractButton.addEventListener('click', function() {
+                    retractLeave(date, leaveUsed, listItem);
+                });
+
+                listItem.appendChild(retractButton);
+            }
+
             historyList.appendChild(listItem);
+        }
+
+        function retractLeave(date, leaveUsed, listItem) {
+            remainingLeave += leaveUsed;
+            leaveUsedDisplay.textContent = `${remainingLeave.toFixed(1)} Days`;
+            localStorage.setItem('remainingLeave', remainingLeave.toFixed(1));
+            
+            // Remove the old history entry
+            historyList.removeChild(listItem);
+
+            // Add a retracted history entry
+            addHistory(date, leaveUsed, true);
+
+            // Update localStorage
+            let history = JSON.parse(localStorage.getItem('useHistory')) || [];
+            history = history.filter(entry => !(entry.date === date && entry.leaveUsed === leaveUsed));
+            history.push({ date, leaveUsed, retracted: true });
+            localStorage.setItem('useHistory', JSON.stringify(history));
         }
 
         function saveUseData(date, leaveUsed) {
             const history = JSON.parse(localStorage.getItem('useHistory')) || [];
-            history.push({ date, leaveUsed });
+            history.push({ date, leaveUsed, retracted: false });
             localStorage.setItem('useHistory', JSON.stringify(history));
         }
 
-        // Load previous leave data on page load
         function loadLeaveData() {
             const history = JSON.parse(localStorage.getItem('useHistory')) || [];
             history.forEach(item => {
-                addHistory(item.date, item.leaveUsed);
+                addHistory(item.date, item.leaveUsed, item.retracted || false);
             });
         }
 
