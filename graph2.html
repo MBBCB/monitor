@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Notepad with Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Load Chart.js -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00d9a7;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #333;
+            color: #ffffff;
+            padding: 10px;
+            z-index: 1000;
+            display: flex;
+            justify-content: left;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar a {
+            padding: 14px 20px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #00d9a7;
+            color: #000;
+        }
+
+        /* Dropdown Container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Button */
+        .dropdown .dropbtn {
+            padding: 14px 20px;
+            background-color: #333;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown:hover .dropbtn {
+            background-color: #00d9a7;
+            color: #000;
+        }
+
+        /* Dropdown Content */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            padding: 12px 16px;
+            display: block;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #00d9a7;
+            color: #000;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Sticky effect for navbar */
+        .sticky {
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+
+        /* Ensure page content does not hide behind navbar */
+        body {
+            padding-top: 60px;
+        }
+
+        #inputSection {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #inputField {
+            width: 80%;
+            height: 150px;
+            background-color: #333;
+            color: #ffffff;
+            border: 1px solid #555;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        canvas {
+            background-color: #2d2d2d;
+            border: 1px solid #333;
+        }
+
+        #stageFilter {
+            width: 200px;
+            margin-bottom: 20px;
+            background-color: #333;
+            color: #ffffff;
+            border: 1px solid #555;
+        }
+
+        button {
+            background-color: #00d9a7;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #00b688;
+        }
+
+        label {
+            color: #00d9a7;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Navbar -->
+    <div class="navbar">
+        <div class="dropdown">
+            <button class="dropbtn">DA XXX</button>
+            <div class="dropdown-content">
+                <a href="#">001</a>
+                <a href="#">002</a>
+                <a href="#">002Q</a>
+                <a href="#">002R</a>
+                <a href="#">004</a>
+                <a href="#">005</a>
+				<a href="#">008</a>
+                <a href="#">008R</a>
+                <a href="#">009</a>
+				<a href="#">010</a>
+                <a href="#">011</a>
+                <a href="#">012</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">DF XXX</button>
+            <div class="dropdown-content">
+                <a href="#">003</a>
+                <a href="#">006</a>
+            </div>
+        </div>
+		<div class="dropdown">
+            <button class="dropbtn">Views</button>
+            <div class="dropdown-content">
+                <a href="graph.html">Size X Use</a>
+            </div>
+        </div>
+    </div>
+	
+	<br>
+	<br>
+
+    <!-- Main Content -->
+
+    <!-- Stage Filter Dropdown -->
+    <div style="text-align: center;">
+        <label for="stageFilter">Select Stage: </label>
+        <select id="stageFilter" onchange="updateGraph()">
+            <!-- Options will be dynamically populated -->
+        </select>
+    </div>
+
+    <div id="graphSection"></div>
+    
+    <div id="inputSection">
+        <textarea id="inputField" placeholder="Paste your data here..."></textarea><br>
+        <button onclick="generateGraph()">Generate Graph</button>
+    </div>
+
+    <script>
+        let chartInstance;
+        let dataByStage = {};
+        let actTaskData = [];
+
+        function generateGraph() {
+            const input = document.getElementById("inputField").value.trim();
+            const graphSection = document.getElementById("graphSection");
+            const stageFilter = document.getElementById("stageFilter");
+            graphSection.innerHTML = ''; // Clear previous graph
+            stageFilter.innerHTML = ''; // Clear previous filter
+
+            if (!input) return;
+
+            const rows = input.split('\n');
+            dataByStage = {}; // Reset stage data
+            actTaskData = []; // Reset ACT-TASK data
+
+            // Parse each row
+            rows.forEach(row => {
+                let date = row.slice(0, 8).trim();
+                let time = row.slice(9, 17).trim();
+                let stage = row.slice(23, 36).trim();
+                let amount = parseInt(row.slice(38).trim(), 10);
+
+                const datetime = `${date} ${time}`;
+
+                if (stage === "ACT-TASK") {
+                    if (!isNaN(amount)) {
+                        actTaskData.push({ datetime, amount });
+                    }
+                } else {
+                    if (!isNaN(amount)) {
+                        if (!dataByStage[stage]) {
+                            dataByStage[stage] = [];
+                        }
+                        dataByStage[stage].push({ datetime, amount });
+                    }
+                }
+            });
+
+            // Populate stage dropdown
+            populateStageFilter();
+
+            // Default stage to display (first stage in the dropdown)
+            const selectedStage = stageFilter.value || Object.keys(dataByStage)[0];
+            if (selectedStage) {
+                createBarChart(selectedStage);
+            }
+        }
+
+        function populateStageFilter() {
+            const stageFilter = document.getElementById("stageFilter");
+
+            // Populate filter with available stages
+            Object.keys(dataByStage).forEach(stage => {
+                const option = document.createElement('option');
+                option.value = stage;
+                option.textContent = stage;
+                stageFilter.appendChild(option);
+            });
+        }
+
+        function updateGraph() {
+            const selectedStage = document.getElementById("stageFilter").value;
+            if (selectedStage) {
+                createBarChart(selectedStage);
+            }
+        }
+		
+
+
+        function createBarChart(stage) {
+            const graphSection = document.getElementById("graphSection");
+            graphSection.innerHTML = ''; // Clear previous graph
+
+            // Create a container for each chart
+            const chartContainer = document.createElement('div');
+            chartContainer.classList.add('chart-container');
+
+            // Create canvas for the chart
+            const canvas = document.createElement('canvas');
+            chartContainer.appendChild(canvas);
+            graphSection.appendChild(chartContainer);
+
+            const stageData = dataByStage[stage];
+            const stageLabels = stageData.map(entry => entry.datetime);
+            const stageAmounts = stageData.map(entry => entry.amount);
+
+            const actTaskAmounts = actTaskData.filter(item => stageLabels.includes(item.datetime)).map(entry => entry.amount);
+
+            // Destroy the old chart instance if it exists
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            // Create the chart using Chart.js
+            chartInstance = new Chart(canvas, {
+                type: 'line', // Line chart for trends
+                data: {
+                    labels: stageLabels,
+                    datasets: [{
+                        label: `${stage} `,
+                        data: stageAmounts,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false, // Disable fill for line chart
+                        tension: 0.1 // Smooth line
+                    },
+                    {
+                        label: 'ACT-TASK',
+                        data: actTaskAmounts,
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1,
+                        fill: false, // Disable fill for ACT-TASK
+                        yAxisID: 'y2',
+                        tension: 0.1 // Smooth line for ACT-TASK
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Amount'
+                            }
+                        },
+                        y2: {
+                            beginAtZero: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'ACT-TASK'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Trend for Stage: ${stage} and ACT-TASK`
+                        }
+                    }
+                }
+            });
+        }
+		
+
+    </script>
+
+    <!-- Additional Content Section -->
+    <div id="about" style="text-align: center; margin-top: 50px;">
+        <h2>CV DATA VISUALISER</h2>
+        <p>This tool allows users to visualize trends based on CV.</p>
+    </div>
+
+</body>
+</html>

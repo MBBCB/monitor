@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Notepad with Combined Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00d9a7;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #333;
+            color: #ffffff;
+            padding: 10px;
+            z-index: 1000;
+            display: flex;
+            justify-content: left;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar a {
+            padding: 14px 20px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #00d9a7;
+            color: #000;
+        }
+
+        /* Dropdown Container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Button */
+        .dropdown .dropbtn {
+            padding: 14px 20px;
+            background-color: #333;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown:hover .dropbtn {
+            background-color: #00d9a7;
+            color: #000;
+        }
+
+        /* Dropdown Content */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            padding: 12px 16px;
+            display: block;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #00d9a7;
+            color: #000;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Sticky effect for navbar */
+        .sticky {
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+
+        /* Ensure page content does not hide behind navbar */
+        body {
+            padding-top: 60px;
+        }
+
+        #inputSection {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #inputField {
+            width: 80%;
+            height: 150px;
+            background-color: #333;
+            color: #ffffff;
+            border: 1px solid #555;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        canvas {
+            background-color: #2d2d2d;
+            border: 1px solid #333;
+        }
+
+        #stageFilter {
+            width: 200px;
+            margin-bottom: 20px;
+            background-color: #333;
+            color: #ffffff;
+            border: 1px solid #555;
+        }
+
+        button {
+            background-color: #00d9a7;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #00b688;
+        }
+
+        label {
+            color: #00d9a7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Navbar -->
+    <div class="navbar">
+        <div class="dropdown">
+            <button class="dropbtn">DA XXX</button>
+            <div class="dropdown-content">
+                <a href="#">001</a>
+                <a href="graph2.html">002</a>
+                <a href="#">002Q</a>
+                <a href="#">002R</a>
+                <a href="#">004</a>
+                <a href="#">005</a>
+				<a href="#">008</a>
+                <a href="#">008R</a>
+                <a href="#">009</a>
+				<a href="#">010</a>
+                <a href="#">011</a>
+                <a href="#">012</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">DF XXX</button>
+            <div class="dropdown-content">
+                <a href="#">003</a>
+                <a href="#">006</a>
+            </div>
+        </div>
+		<div class="dropdown">
+            <button class="dropbtn">Views</button>
+            <div class="dropdown-content">
+                <a href="graph.html">Size X Use</a>
+            </div>
+        </div>
+    </div>
+	
+	<br>
+	<br>
+
+    
+
+    <div id="intervalDisplay">Time Interval: <span id="currentInterval"></span></div>
+    <div id="navButtons">
+        <button onclick="prevInterval()">Previous</button>
+        <button onclick="nextInterval()">Next</button>
+    </div>
+
+    <div id="graphSection"></div>
+	
+	<br>
+	
+	<div id="inputSection">
+        <textarea id="inputField" placeholder="Paste your data here..."></textarea><br>
+        <button onclick="generateGraph()">Generate Graph</button>
+    </div>
+
+    <script>
+        let currentIntervalIndex = 0;
+        let groupedData = [];
+        const intervalSize = 8; // 8 entries (000, 127, 128, 129, 130, 255A, 255B)
+
+        function generateGraph() {
+            const input = document.getElementById("inputField").value.trim();
+            const graphSection = document.getElementById("graphSection");
+            graphSection.innerHTML = ''; // Clear previous graph
+
+            if (!input) return;
+
+            const rows = input.split('\n');
+            let data = [];
+
+            // Parse each row
+            rows.forEach(row => {
+                let date = row.slice(0, 8).trim();
+                let time = row.slice(9, 17).trim();
+                let stage = row.slice(23, 36).trim();
+                let amount = parseInt(row.slice(38).trim(), 10);
+
+                if (!isNaN(amount)) {
+                    data.push({ date, time, stage, amount });
+                }
+            });
+
+            // Sort data by date and time
+            data.sort((a, b) => {
+                if (a.date === b.date) {
+                    return a.time.localeCompare(b.time);
+                }
+                return a.date.localeCompare(b.date);
+            });
+
+            // Group data into intervals
+            groupedData = [];
+            for (let i = 0; i < data.length; i += intervalSize) {
+                groupedData.push(data.slice(i, i + intervalSize));
+            }
+
+            // Render the first interval
+            currentIntervalIndex = 0;
+            renderGraph();
+        }
+
+        function renderGraph() {
+		const graphSection = document.getElementById("graphSection");
+		graphSection.innerHTML = ''; // Clear previous graph
+
+		if (groupedData.length === 0 || !groupedData[currentIntervalIndex]) return;
+
+		const intervalData = groupedData[currentIntervalIndex];
+
+		// Define the fixed stage labels
+		const stageLabels = ['000', '127', '128', '129', '130', '255A', '255B'];
+		const labels = stageLabels.map(stage => `STG-${stage}`);
+
+		// Prepare datasets aligned with fixed stages
+		const stgSizeData = [];
+		const stgUseData = [];
+
+		console.log("Parsed interval data:", intervalData); // Debugging line to check parsed data
+
+		// Loop through the labels and match the data for STG-SIZE and STG-USE
+		stageLabels.forEach(stage => {
+			const sizeEntry = intervalData.find(entry => entry.stage.includes(`STG-SIZE-${stage}`));
+			const useEntry = intervalData.find(entry => entry.stage.includes(`STG-USE-${stage}`));
+
+			console.log(`Stage: ${stage}, Size Entry:`, sizeEntry, "Use Entry:", useEntry); // Debugging line
+
+			stgSizeData.push(sizeEntry ? sizeEntry.amount : 0); // Push size amount if exists, otherwise 0
+			stgUseData.push(useEntry ? useEntry.amount : 0);     // Push use amount if exists, otherwise 0
+		});
+
+		// Display the current interval in the UI
+		const currentInterval = `${intervalData[0].date} ${intervalData[0].time}`;
+		document.getElementById("currentInterval").innerText = currentInterval;
+
+		// Create a container for the chart
+		const chartContainer = document.createElement('div');
+		chartContainer.classList.add('chart-container');
+
+		// Create canvas for the chart
+		const canvas = document.createElement('canvas');
+		chartContainer.appendChild(canvas);
+		graphSection.appendChild(chartContainer);
+
+		// Create the combined chart using Chart.js
+		new Chart(canvas, {
+			type: 'bar',
+			data: {
+				labels: labels, // Use fixed stages as labels
+				datasets: [
+					{
+						label: 'STG-SIZE',
+						data: stgSizeData,
+						backgroundColor: 'rgba(75, 192, 192, 0.2)',
+						borderColor: 'rgba(75, 192, 192, 1)',
+						borderWidth: 1,
+						type: 'bar'
+					},
+					{
+						label: 'STG-USE',
+						data: stgUseData,
+						backgroundColor: 'rgba(255, 99, 132, 0.2)',
+						borderColor: 'rgba(255, 99, 132, 1)',
+						borderWidth: 1,
+						type: 'line'
+					}
+				]
+			},
+			options: {
+				responsive: true,
+				scales: {
+					y: {
+						beginAtZero: true
+					}
+				},
+				plugins: {
+					title: {
+						display: true,
+						text: `Combined STG-SIZE (Bar) and STG-USE (Line)`
+					}
+				}
+			}
+		});
+	}
+
+
+        function prevInterval() {
+            if (currentIntervalIndex > 0) {
+                currentIntervalIndex--;
+                renderGraph();
+            }
+        }
+
+        function nextInterval() {
+            if (currentIntervalIndex < groupedData.length - 1) {
+                currentIntervalIndex++;
+                renderGraph();
+            }
+        }
+    </script>
+</body>
+</html>
